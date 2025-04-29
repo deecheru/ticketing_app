@@ -1,0 +1,179 @@
+/* Base CSS - Global styles for the entire application */
+
+:root {
+    /* Color palette - Gray and pastel blue */
+    --primary-color: #7fb3d5; /* Pastel blue */
+    --primary-dark: #5499c7;  /* Darker pastel blue */
+    --primary-light: #aed6f1; /* Lighter pastel blue */
+    --secondary-color: #566573; /* Gray */
+    --secondary-dark: #2c3e50; /* Dark gray */
+    --secondary-light: #abb2b9; /* Light gray */
+    --background-color: #f8f9fa;
+    --text-color: #333333;
+    --border-color: #d5dbdb;
+    --success-color: #76d7c4;  /* Pastel green */
+    --warning-color: #f7dc6f;  /* Pastel yellow */
+    --danger-color: #f1948a;   /* Pastel red */
+    --info-color: #85c1e9;     /* Light blue */
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Navigation bar customization */
+  .navbar {
+    background-color: var(--secondary-dark) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-brand {
+    font-weight: 600;
+    color: white !important;
+  }
+  
+  .navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+  
+  .navbar-dark .navbar-nav .nav-link:hover {
+    color: white !important;
+  }
+  
+  .dropdown-menu {
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: none;
+  }
+  
+  .dropdown-item:hover {
+    background-color: var(--primary-light);
+  }
+  
+  /* Container styles */
+  .container {
+    padding: 20px 15px;
+  }
+  
+  /* Buttons */
+  .btn {
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+  
+  .btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+  }
+  
+  /* Forms */
+  .form-control {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    padding: 10px;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(127, 179, 213, 0.25);
+  }
+  
+  label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: var(--secondary-dark);
+  }
+  
+  /* Alerts */
+  .alert {
+    border-radius: 4px;
+    border: none;
+  }
+  
+  .alert-success {
+    background-color: var(--success-color);
+    color: #1e6651;
+  }
+  
+  .alert-warning {
+    background-color: var(--warning-color);
+    color: #7e5109;
+  }
+  
+  .alert-danger {
+    background-color: var(--danger-color);
+    color: #922b21;
+  }
+  
+  .alert-info {
+    background-color: var(--info-color);
+    color: #1b4f72;
+  }
+  
+  /* Footer */
+  .footer {
+    background-color: var(--secondary-light) !important;
+    color: var(--secondary-dark);
+    padding: 15px 0;
+    margin-top: 30px;
+  }
+  
+  /* Utilities */
+  .card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: var(--secondary-light);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+  }
+  
+  /* Table styling */
+  .table {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .table thead th {
+    background-color: var(--secondary-light);
+    color: var(--secondary-dark);
+    border-bottom: 2px solid var(--border-color);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.8rem;
+    }
+    
+    .container {
+      padding: 15px 10px;
+    }
+  }

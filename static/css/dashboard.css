@@ -1,0 +1,187 @@
+/* Dashboard Styles - With gray and pastel blue color scheme */
+
+.dashboard-container {
+    padding: 20px 0;
+  }
+  
+  .dashboard-container h1 {
+    margin-bottom: 30px;
+    color: #2c3e50; /* Dark gray */
+    font-weight: 500;
+  }
+  
+  /* Card styling */
+  .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: white;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: #abb2b9; /* Light gray */
+    border-bottom: 1px solid #d5dbdb;
+    padding: 15px 20px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
+  .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 16px;
+    color: #2c3e50; /* Dark gray */
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  /* Statistics cards */
+  .card .display-4 {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #7fb3d5; /* Pastel blue */
+  }
+  
+  /* Open tickets card */
+  .row:first-child .card:nth-child(1) .display-4 {
+    color: #5499c7; /* Darker pastel blue */
+  }
+  
+  /* Assigned tickets card */
+  .row:first-child .card:nth-child(2) .display-4 {
+    color: #566573; /* Gray */
+  }
+  
+  /* Closed tickets card */
+  .row:first-child .card:nth-child(3) .display-4 {
+    color: #aed6f1; /* Lighter pastel blue */
+  }
+  
+  /* Button styling */
+  .btn-primary {
+    background-color: #7fb3d5; /* Pastel blue */
+    border-color: #7fb3d5;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: #5499c7; /* Darker pastel blue */
+    border-color: #5499c7;
+    transform: translateY(-1px);
+  }
+  
+  /* Activity log and recent tickets */
+  .card p {
+    color: #566573; /* Gray */
+    font-size: 14px;
+  }
+  
+  /* Tables within cards */
+  .card table {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  .card table th {
+    font-weight: 600;
+    color: #2c3e50; /* Dark gray */
+    border-bottom: 2px solid #abb2b9; /* Light gray */
+    padding: 10px;
+  }
+  
+  .card table td {
+    padding: 10px;
+    border-top: 1px solid #d5dbdb;
+    color: #566573; /* Gray */
+  }
+  
+  .card table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* Status badges */
+  .badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 12px;
+  }
+  
+  .badge-open {
+    background-color: #5499c7; /* Darker pastel blue */
+    color: white;
+  }
+  
+  .badge-closed {
+    background-color: #abb2b9; /* Light gray */
+    color: #2c3e50;
+  }
+  
+  .badge-pending {
+    background-color: #aed6f1; /* Lighter pastel blue */
+    color: #2c3e50;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .dashboard-container h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    
+    .card .display-4 {
+      font-size: 2rem;
+    }
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    text-align: center;
+    padding: 30px 0;
+  }
+  
+  .empty-state p {
+    color: #566573; /* Gray */
+    margin-top: 10px;
+  }
+  
+  /* Quick action buttons */
+  .quick-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .quick-action-btn {
+    background-color: white;
+    border: 1px solid #d5dbdb;
+    border-radius: 4px;
+    padding: 8px 16px;
+    color: #566573; /* Gray */
+    transition: all 0.2s;
+  }
+  
+  .quick-action-btn:hover {
+    background-color: #7fb3d5; /* Pastel blue */
+    color: white;
+    border-color: #7fb3d5;
+  }
+  
+  /* Chart containers */
+  .chart-container {
+    width: 100%;
+    height: 250px;
+  }

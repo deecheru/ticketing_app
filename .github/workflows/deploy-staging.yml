@@ -7,21 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github_actions
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -38,17 +23,11 @@ jobs:
       run: |
         python manage.py test
     - name: Deploy to Staging
-      # Replace this with your actual deployment commands
+      # Here you would add steps specific to your deployment process
+      # This could be a deployment to Heroku, AWS, or other platforms
       run: |
         echo "Deploying to staging environment"
-        # Example for specific deployment platforms:
-        
-        # For Heroku:
+        # Example for Heroku:
         # pip install heroku
-        # echo ${{ secrets.HEROKU_API_KEY }} | heroku login --interactive --
-        # heroku git:remote -a your-staging-app-name
+        # heroku login -i
         # git push heroku develop:main
-        
-        # For AWS Elastic Beanstalk:
-        # pip install awsebcli
-        # eb deploy staging-environment

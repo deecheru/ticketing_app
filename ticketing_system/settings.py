@@ -78,14 +78,13 @@ WSGI_APPLICATION = 'ticketing_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ticketing_system',  # Your database name
-        'USER': 'postgres',          # Your PostgreSQL username (usually 'postgres' by default)
-        'PASSWORD': 'root',  # The password you set during PostgreSQL installation
-        'HOST': 'localhost',         # Set to your database host (localhost for local development)
-        'PORT': '5432',              # Default PostgreSQL port is 5432
+        'NAME': 'github_actions',  # Change the database name to match the service
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

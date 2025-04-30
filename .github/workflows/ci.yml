@@ -34,11 +34,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Set DJANGO_SETTINGS_MODULE
+      - name: Set up database configuration
         run: |
           echo "DJANGO_SETTINGS_MODULE=ticketing_system.settings" >> $GITHUB_ENV
-      - name: Run Tests
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/github_actions
+          echo "DB_NAME=github_actions" >> $GITHUB_ENV
+          echo "DB_USER=postgres" >> $GITHUB_ENV
+          echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+      - name: Run migrations
         run: |
-          python manage.py test
+          python manage.py migrate
+      - name: Run Tests
+        run: |
+          python manage.py test accounts

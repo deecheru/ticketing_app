@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Ticket #{{ ticket.id }}</h1>
+
+  <p><strong>Title:</strong> {{ ticket.title }}</p>
+  <p><strong>Description:</strong> {{ ticket.description }}</p>
+  <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
+  <p><strong>Impact:</strong> {{ ticket.get_impact_display }}</p>
+  <p><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+  <p><strong>Category:</strong> {{ ticket.category }}</p>
+  <p><strong>Created By:</strong> {{ ticket.created_by.username }}</p>
+  <p><strong>Created At:</strong> {{ ticket.created_at }}</p>
+  <p><strong>Assigned to:</strong> {{ ticket.assigned_to }}</p>
+  {% endblock %}
+
+  <!-- <a href="{% url 'edit_ticket' ticket.id %}">Edit Ticket</a> <a href="{% url 'list_tickets' %}">Back to Ticket List</a> -->
+ 

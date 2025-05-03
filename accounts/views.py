@@ -4,8 +4,9 @@ from django.shortcuts import render, redirect
 from django.db import transaction
 from .models import User, Profile
 from django.contrib import messages
-from .forms import LoginForm,UserUpdateForm, ProfileUpdateForm
-from django.contrib.auth.decorators import login_required
+from .forms import LoginForm,UserUpdateForm, ProfileUpdateForm, CompanyCreationForm,UserCreationForm
+from django.contrib.auth.decorators import login_required,user_passes_test
+from user_tickets.models import Ticket
 
 def login_view(request):
     if request.method == 'POST':
@@ -21,14 +22,25 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+@login_required
 def dashboard_view(request):
     # Check if user is authenticated
     if not request.user.is_authenticated:
         return redirect('login')
-        
+    if request.user.is_superuser:  # Check if the user is an admin (superuser)
+        open_ticket_count = Ticket.objects.exclude(status='CLOSED').count()
+        closed_ticket_count = Ticket.objects.filter(status='CLOSED').count()
+        #all_open_tickets = Ticket.objects.exclude(status='CLOSED').order_by('-created_at') # Fetch all open tickets for admin
+    else:
+        user_company = request.user.company
+        open_ticket_count = Ticket.objects.filter(company=user_company).exclude(status='CLOSED').count()
+        closed_ticket_count = Ticket.objects.filter(company=user_company, status='CLOSED').count()
+        #all_open_tickets = Ticket.objects.filter(company=user_company).exclude(status='CLOSED').order_by('-created_at')  
     # Add any context data you want to pass to the template
     context = {
         'user': request.user,
+        'open_ticket_count': open_ticket_count,
+        'closed_ticket_count': closed_ticket_count,
         # Add other dashboard data like ticket counts, recent tickets, etc.
     }
     
@@ -70,3 +82,30 @@ def profile_update(request):
     }
     return render(request, 'accounts/profile_update.html', context)
 
+#*************************#
+def is_staff_check(user):
+    return user.is_staff
+
+@login_required
+@user_passes_test(is_staff_check)
+def add_user(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard') 
+    else:
+        form = UserCreationForm()
+    return render(request, 'accounts/add_user.html', {'form': form})
+
+@login_required
+@user_passes_test(is_staff_check)
+def add_company(request):
+    if request.method == 'POST':
+        form = CompanyCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = CompanyCreationForm()
+    return render(request, 'accounts/add_company.html', {'form': form})

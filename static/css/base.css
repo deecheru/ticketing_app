@@ -6,7 +6,7 @@
     --primary-dark: #5499c7;  /* Darker pastel blue */
     --primary-light: #aed6f1; /* Lighter pastel blue */
     --secondary-color: #566573; /* Gray */
-    --secondary-dark: #2c3e50; /* Dark gray */
+    --secondary-dark: #314457; /* Dark gray */
     --secondary-light: #abb2b9; /* Light gray */
     --background-color: #f8f9fa;
     --text-color: #333333;
@@ -15,6 +15,7 @@
     --warning-color: #f7dc6f;  /* Pastel yellow */
     --danger-color: #f1948a;   /* Pastel red */
     --info-color: #85c1e9;     /* Light blue */
+    --navbar-color: #5d6d7e;
   }
   
   body {
@@ -24,7 +25,13 @@
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
+  main {
+    flex: 1 0 auto;
+}
   
   /* Navigation bar customization */
   .navbar {
@@ -53,6 +60,9 @@
   
   .dropdown-item:hover {
     background-color: var(--primary-light);
+  }
+  .custom-navbar {
+    background-color: var(--secondary-dark);
   }
   
   /* Container styles */
@@ -137,7 +147,7 @@
     background-color: var(--secondary-light) !important;
     color: var(--secondary-dark);
     padding: 15px 0;
-    margin-top: 30px;
+    margin-top: auto;
   }
   
   /* Utilities */

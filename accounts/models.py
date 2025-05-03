@@ -4,7 +4,7 @@ from django.db import models
 class User(AbstractUser):
     """Custom user model for multi-tenant authentication"""
     # Add custom fields
-    company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, related_name='users')
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, related_name='users',blank=True)
     
     # You could add more fields like:
     # role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='staff')
@@ -24,22 +24,27 @@ class Company(models.Model):
 
 class Profile(models.Model):
     """Extended profile information for users"""
-    ROLE_CHOICES = (
-        ('admin', 'Administrator'),
-        ('client', 'Client'),
+    LANGUAGE_CHOICES = (
+        ('en', 'English'),
+        ('es', 'Spanish'),
+        ('fr', 'French'),
+        ('de', 'German'),
+        ('zh', 'Chinese'),
+        ('ja', 'Japanese'),
+        # Add more languages as needed
     )
     
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='agent')
+
     job_title = models.CharField(max_length=100, blank=True, null=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-    bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='static/images/profile_pictures/', blank=True, null=True)
     
     # Additional fields you might consider
     timezone = models.CharField(max_length=50, default='UTC', blank=True)
-    language = models.CharField(max_length=10, default='en', blank=True)
+    language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='en',blank=True)
     
     # Notification preferences
     email_notifications = models.BooleanField(default=True)

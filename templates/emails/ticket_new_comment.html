@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>[{{ company.name }}] New Comment on Ticket: {{ ticket.title }}</title>
+</head>
+<body>
+    <p>A new comment has been added to Ticket <a href="{{ ticket_url }}">#{{ ticket.id }} - {{ ticket.title }}</a> by {{ comment.created_by.username }}:</p>
+    <blockquote>{{ comment.text|linebreaksbr }}</blockquote>
+    <p>View the full ticket and comment here: <a href="{{ ticket_url }}">View Ticket</a></p>
+    <p>Thank you,</p>
+    <p>Your Support Team</p>
+</body>
+</html>

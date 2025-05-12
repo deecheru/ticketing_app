@@ -187,3 +187,32 @@
       padding: 15px 10px;
     }
   }
+  /* CSS for compact comments section */
+.comment-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  transition: background-color 0.2s;
+}
+
+.comment-item:hover {
+  background-color: rgba(0,0,0,0.01);
+}
+
+/* Style for comment textarea */
+#id_text {
+  resize: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid #ced4da;
+  width: 100%;
+  height: 36px;
+}
+
+/* Make form more compact */
+.text-secondary.small {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

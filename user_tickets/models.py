@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from accounts.models import User, Company
+import os
 
 # Service hierarchy models (Family -> Type -> Category)
 class ServiceFamily(models.Model):
@@ -19,6 +20,7 @@ class ServiceFamily(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.company.name})"
+
 class ServiceType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
@@ -72,27 +74,30 @@ class Ticket(models.Model):
     # Core ticket fields
     title = models.CharField(max_length=255)
     description = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Open')
     impact = models.CharField(max_length=20, choices=IMPACT, default='Person')
     priority = models.CharField(max_length=20, choices=PRIORITY, default='MEDIUM')
-    
+    contacts = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='tagged_in_tickets',
+        blank=True,
+        help_text='Tag other users from your company who should be involved in this ticket.'
+    )
     # Foreign keys
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null = True, blank = True,related_name="company_tickets")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name="company_tickets")
     category = models.ForeignKey(ServiceCategory, on_delete=models.SET_NULL, 
                                 null=True, blank=True, related_name="tickets")
-    #impact = models.ForeignKey(ImpactLevel, on_delete=models.SET_NULL, 
-    #                          null=True, blank=True, related_name="tickets")
-    #priority = models.ForeignKey(PriorityLevel, on_delete=models.SET_NULL, 
-     #                           null=True, blank=True, related_name="tickets")
     
     # User assignments
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, 
                                   null=True, related_name="created_tickets")
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, 
-                                null=True, blank=True, related_name="assigned_tickets")
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                   null=True, blank=True, related_name="assigned_tickets")
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
     
     def save(self, *args, **kwargs):
         # When setting a ticket to resolved, update the resolved_at timestamp
@@ -101,9 +106,9 @@ class Ticket(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"#{self.id} - {self.title}"
+        return f"{self.title}"
 
-'''
+
 class TicketAttachment(models.Model):
     """Model for ticket attachments"""
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="attachments")
@@ -116,16 +121,18 @@ class TicketAttachment(models.Model):
     
     def __str__(self):
         return f"Attachment: {self.filename} (Ticket #{self.ticket.id})"
+    def get_extension(self):
+        name, extension = os.path.splitext(self.filename)
+        return extension.lower()
 
 
 class TicketComment(models.Model):
     """Model for comments on tickets"""
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="comments")
-    text = models.TextField()
+    text = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_internal = models.BooleanField(default=False)  # To differentiate between customer-visible and internal notes
     
     def __str__(self):
         return f"Comment on Ticket #{self.ticket.id} by {self.created_by}"
@@ -133,7 +140,7 @@ class TicketComment(models.Model):
     class Meta:
         ordering = ['created_at']
 
-
+'''
 class TicketHistory(models.Model):
     """Model to track changes to tickets for audit and tracking purposes"""
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="history")

@@ -1,10 +1,12 @@
 from django import forms
-from .models import Ticket,ServiceCategory,ServiceFamily,ServiceType
+from .models import Ticket,ServiceCategory,ServiceFamily,ServiceType,TicketComment
 
 class TicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ['title', 'description', 'impact', 'priority', 'category']
+        fields = ['title', 'description', 'impact', 'priority', 'category','contacts']
+        widgets = {'contacts': forms.SelectMultiple(attrs={'class': 'form-select', 'multiple': True}),
+        }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
@@ -14,8 +16,15 @@ class TicketForm(forms.ModelForm):
             
             # This traverses the relationships: Category -> ServiceType -> ServiceFamily -> Company
             self.fields['category'].queryset = ServiceCategory.objects.filter(
-                service_type__family__company=company
-            )
+                service_type__family__company=company)
+            self.fields['contacts'].queryset = user.company.users.exclude(id=user.id)
+class TicketCommentForm(forms.ModelForm):
+    class Meta:
+        model = TicketComment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500', 'rows': 3, 'placeholder': 'Add an initial comment (optional)'}),
+        }
 #*********************************************#
 
 class ServiceFamilyCreationForm(forms.ModelForm):

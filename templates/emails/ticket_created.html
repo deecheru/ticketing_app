@@ -1,0 +1,96 @@
+# templates/emails/ticket_created.html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+        }
+        .content {
+            padding: 20px;
+        }
+        .ticket-info {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .ticket-meta {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>New Ticket Created</h2>
+            <p>{{ company.name }}</p>
+        </div>
+        
+        <div class="content">
+            <p>A new ticket has been created in the {{ company.name }} support system:</p>
+            
+            <div class="ticket-info">
+                <h3>{{ ticket.title }}</h3>
+                <div class="ticket-meta">
+                    <p><strong>Ticket ID:</strong> #{{ ticket.id }}</p>
+                    <p><strong>Status:</strong> {{ ticket.get_status_display }}</p>
+                    <p><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+                    <p><strong>Impact:</strong> {{ ticket.get_impact_display }}</p>
+                    {% if ticket.category %}
+                    <p><strong>Category:</strong> {{ ticket.category.name }}</p>
+                    {% endif %}
+                    <p><strong>Created by:</strong> {{ ticket.created_by.get_full_name|default:ticket.created_by.username }}</p>
+                    {% if ticket.assigned_to %}
+                    <p><strong>Assigned to:</strong> {{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.username }}</p>
+                    {% endif %}
+                </div>
+                
+                <h4>Description:</h4>
+                <p>{{ ticket.description }}</p>
+            </div>
+            
+            <a href="{{ ticket_url }}" class="button">View Ticket</a>
+            
+            <p>You're receiving this email because you are either the creator of this ticket, assigned to it, or have been tagged as a contact.</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from {{ company.name }} Support System. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

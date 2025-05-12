@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>[{{ company.name }}] Ticket Updated: {{ ticket.title }}</title>
+</head>
+<body>
+    <p>Ticket <a href="{{ ticket_url }}">#{{ ticket.id }} - {{ ticket.title }}</a> has been updated by {{ updated_by.username }}.</p>
+
+    {% if changes %}
+    <h3>Changes:</h3>
+    <ul>
+        {% for field, values in changes.items %}
+        <li><strong>{{ field }}:</strong>
+            {% if values.0 %}<code>{{ values.0 }}</code>{% else %}<em>N/A</em>{% endif %} &raquo;
+            {% if values.1 %}<code>{{ values.1 }}</code>{% else %}<em>N/A</em>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if attachments %}
+    <h3>New Attachments:</h3>
+    <ul>
+        {% for attachment in attachments %}
+        <li>{{ attachment.name }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>View the full ticket details here: <a href="{{ ticket_url }}">View Ticket</a></p>
+    <p>Thank you,</p>
+    <p>Your Support Team</p>
+</body>
+</html>

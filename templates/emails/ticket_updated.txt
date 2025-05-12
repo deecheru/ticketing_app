@@ -1,0 +1,20 @@
+Ticket [{{ company.name }}] #{{ ticket.id }} - {{ ticket.title }} has been updated by {{ updated_by.username }}.
+
+{% if changes %}
+Changes:
+{% for field, (old, new) in changes.items %}
+* {{ field }}: {% if old %}{{ old }}{% else %}N/A{% endif %} >> {% if new %}{{ new }}{% else %}N/A{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if attachments %}
+New Attachments:
+{% for attachment in attachments %}
+* {{ attachment.name }}
+{% endfor %}
+{% endif %}
+
+View the full ticket details here: {{ ticket_url }}
+
+Thank you,
+Your Support Team

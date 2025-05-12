@@ -60,6 +60,7 @@ jobs:
           coverage run --source='.' manage.py test accounts user_tickets
           coverage report
           coverage xml
+          coverage html
           
       - name: Upload coverage to Codecov
         if: success() && github.event_name == 'push'
@@ -69,6 +70,15 @@ jobs:
           file: ./coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+          
+      - name: Upload coverage reports as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 7
           
       - name: Check for test failures
         if: failure()

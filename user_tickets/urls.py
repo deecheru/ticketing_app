@@ -12,6 +12,12 @@ urlpatterns = [
     path('add-service-family/', views.add_service_family, name='add_service_family'),
     path('add-service-type/', views.add_service_type, name='add_service_type'),
     path('add-service-category/', views.add_service_category, name='add_service_category'),
-     path('user_tickets/<int:pk>/edit/', views.edit_ticket, name='edit_ticket')
+    path('user_tickets/<int:pk>/edit/', views.edit_ticket, name='edit_ticket'),
+    
+    # Admin URLs
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/companies/', views.admin_manage_companies, name='admin_manage_companies'),
+    path('admin/users/', views.admin_manage_users, name='admin_manage_users'),
+    path('admin/tickets/', views.admin_manage_tickets, name='admin_manage_tickets'),
 ]
 

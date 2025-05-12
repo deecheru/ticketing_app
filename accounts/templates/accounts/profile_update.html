@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0">Update Profile</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- User Information -->
+                        <h4>User Information</h4>
+                        <div class="mb-3">
+                            <label for="{{ user_form.username.id_for_label }}" class="form-label">Username</label>
+                            {% render_field user_form.username class="form-control" %}
+                            {% if user_form.username.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ user_form.username.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ user_form.email.id_for_label }}" class="form-label">Email</label>
+                            {% render_field user_form.email class="form-control" %}
+                            {% if user_form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ user_form.email.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ user_form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                    {% render_field user_form.first_name class="form-control" %}
+                                    {% if user_form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ user_form.first_name.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ user_form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                    {% render_field user_form.last_name class="form-control" %}
+                                    {% if user_form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ user_form.last_name.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Profile Information -->
+                        <h4>Profile Information</h4>
+                        <div class="mb-3">
+                            <label for="{{ profile_form.profile_picture.id_for_label }}" class="form-label">Profile Picture</label>
+                            {% render_field profile_form.profile_picture class="form-control" %}
+                            {% if profile_form.profile_picture.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.profile_picture.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.job_title.id_for_label }}" class="form-label">Job Title</label>
+                            {% render_field profile_form.job_title class="form-control" %}
+                            {% if profile_form.job_title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.job_title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.location.id_for_label }}" class="form-label">Location</label>
+                            {% render_field profile_form.location class="form-control" %}
+                            {% if profile_form.location.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.location.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.phone.id_for_label }}" class="form-label">Phone</label>
+                            {% render_field profile_form.phone class="form-control" %}
+                            {% if profile_form.phone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.phone.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.timezone.id_for_label }}" class="form-label">Timezone</label>
+                            {% render_field profile_form.timezone class="form-control" %}
+                            {% if profile_form.timezone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.timezone.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ profile_form.language.id_for_label }}" class="form-label">Language</label>
+                            {% render_field profile_form.language class="form-control" %}
+                            {% if profile_form.language.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ profile_form.language.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {% render_field profile_form.email_notifications class="form-check-input" %}
+                                <label class="form-check-label" for="{{ profile_form.email_notifications.id_for_label }}">
+                                    Receive Email Notifications
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

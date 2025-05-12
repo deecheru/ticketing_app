@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'widget_tweaks',
     'user_tickets',
 ]
 
@@ -144,9 +145,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'chedeepika1997@gmail.com'  # Replace with your actual Gmail address
-EMAIL_HOST_PASSWORD = 'mcrd qnng nnzs ynyi'  # Replace with your App Password
+EMAIL_HOST_USER = 'chedeepika1997@gmail.com'
+EMAIL_HOST_PASSWORD = 'mcrd qnng nnzs ynyi'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 10  # Timeout in seconds for email operations
+EMAIL_USE_SSL = False  # Use TLS instead of SSL
+EMAIL_SUBJECT_PREFIX = '[Ticketing System] '  # Prefix for all email subjects
 
 # Cache settings
 CACHES = {
@@ -168,3 +172,9 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.CustomUserModelBackend',
+]

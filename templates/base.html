@@ -19,49 +19,57 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #314457 !important;">
             <div class="container">
-                <a class="navbar-brand" href="#">Ticketing System</a>
+                <a class="navbar-brand" href="{% url 'dashboard' %}">Ticketing System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'select_service' %}">New Ticket</a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'create_ticket' %}">Create Ticket</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'open_tickets' %}">Open Tickets</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'closed_tickets' %}">Closed Tickets</a>
+                            </li>
+                            {% if user.is_staff %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_companies' %}">Manage Companies</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_users' %}">Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_tickets' %}">Manage Tickets</a></li>
+                                </ul>
+                            </li>
+                            {% endif %}
                         {% endif %}
                     </ul>
                     <ul class="navbar-nav">
                         {% if user.is_authenticated %}
-                        {% if user.is_staff %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'add_user'%}">Add User</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'add_company'%}">Add Company</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'add_service_family'%}">Add Service Family</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'add_service_type'%}">Add Service Type</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{%url 'add_service_category'%}">Add Service Category</a>
-                        </li>
-                        {%endif%}
-
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                               {{user.last_name}} {{ user.first_name }}
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{%url 'profile_view'%}">Profile</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' %}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'change_password' %}">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
                             </ul>
                         </li>
                         {% else %}

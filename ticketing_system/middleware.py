@@ -36,6 +36,7 @@ class SessionManagementMiddleware:
                 
                 # Check for session timeout
                 if current_time - last_activity > timedelta(hours=1):
+                    self.clear_session_data(request.user.id)
                     logout(request)
                     messages.error(request, "Your session has expired due to inactivity.")
                     return redirect('login')
@@ -46,6 +47,7 @@ class SessionManagementMiddleware:
 
             # Check for session conflicts
             if self.has_session_conflict(request, session_data):
+                self.clear_session_data(request.user.id)
                 logout(request)
                 messages.error(request, "Your session has been terminated due to login from another device.")
                 return redirect('login')
@@ -76,14 +78,22 @@ class SessionManagementMiddleware:
         current_session_id = request.session.session_key
         stored_session_id = session_data.get('session_id')
         
-        if stored_ip and current_ip != stored_ip:
-            # Allow admin users to have multiple sessions
-            if not request.user.is_staff:
+        # If the stored session ID is None or empty, there's no conflict
+        if not stored_session_id:
+            return False
+            
+        # If the current session ID matches the stored one, there's no conflict
+        if current_session_id == stored_session_id:
+            return False
+            
+        # For non-staff users, check IP address
+        if not request.user.is_staff:
+            if stored_ip and current_ip != stored_ip:
                 return True
         
-        # Check if session ID matches
-        if stored_session_id and current_session_id != stored_session_id:
-            if not request.user.is_staff:
-                return True
-                
-        return False 
+        return False
+
+    def clear_session_data(self, user_id):
+        """Clear the session data from cache"""
+        session_key = f"user_session_{user_id}"
+        cache.delete(session_key) 

@@ -2,12 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import ServiceFamily, ServiceType, ServiceCategory,Ticket,TicketAttachment,TicketComment
 from .forms import *
 from django.contrib.auth.decorators import login_required,user_passes_test
-from accounts.models import User
+from accounts.models import User, Company, Profile
 from django.contrib import messages
 from .notifications import send_ticket_creation_notification, send_new_comment_notification,send_ticket_updated_notification   
 import csv
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Count
+from django.db.models import Q
+from django.db.utils import IntegrityError
 
 def is_staff_check(user):
     return user.is_staff
@@ -144,13 +147,19 @@ def generate_ticket_csv(tickets):
 @login_required
 def view_open_tickets(request):
     user = request.user
-    company = user.company
     
-    # Get all open tickets for the user's company
-    open_tickets = Ticket.objects.filter(
-        company=company,
-        status__in=['OPEN', 'IN_PROGRESS', 'PENDING']
-    ).order_by('-created_at')
+    # For admin users, show all open tickets
+    if user.is_staff:
+        open_tickets = Ticket.objects.filter(
+            status__in=['OPEN', 'IN_PROGRESS', 'PENDING']
+        ).order_by('-created_at')
+    else:
+        # For regular users, show only their company's tickets
+        company = user.company
+        open_tickets = Ticket.objects.filter(
+            company=company,
+            status__in=['OPEN', 'IN_PROGRESS', 'PENDING']
+        ).order_by('-created_at')
     
     # Handle CSV download
     if request.GET.get('download') == 'csv':
@@ -158,20 +167,27 @@ def view_open_tickets(request):
     
     context = {
         'open_tickets': open_tickets,
-        'user': user
+        'user': user,
+        'is_admin': user.is_staff
     }
     return render(request, 'tickets/open_tickets.html', context)
 
 @login_required
 def view_closed_tickets(request):
     user = request.user
-    company = user.company
     
-    # Get all closed tickets for the user's company
-    closed_tickets = Ticket.objects.filter(
-        company=company,
-        status__in=['RESOLVED', 'CLOSED']
-    ).order_by('-created_at')
+    # For admin users, show all closed tickets
+    if user.is_staff:
+        closed_tickets = Ticket.objects.filter(
+            status__in=['RESOLVED', 'CLOSED']
+        ).order_by('-created_at')
+    else:
+        # For regular users, show only their company's tickets
+        company = user.company
+        closed_tickets = Ticket.objects.filter(
+            company=company,
+            status__in=['RESOLVED', 'CLOSED']
+        ).order_by('-created_at')
     
     # Handle CSV download
     if request.GET.get('download') == 'csv':
@@ -179,7 +195,8 @@ def view_closed_tickets(request):
     
     context = {
         'closed_tickets': closed_tickets,
-        'user': user
+        'user': user,
+        'is_admin': user.is_staff
     }
     return render(request, 'tickets/closed_tickets.html', context)
 
@@ -294,3 +311,216 @@ def add_service_category(request):
     else:
         form = ServiceCategoryCreationForm()
     return render(request, 'tickets/add_service_category.html', {'form': form})
+
+@login_required
+@user_passes_test(is_staff_check)
+def admin_dashboard(request):
+    # Get statistics
+    total_tickets = Ticket.objects.count()
+    open_tickets = Ticket.objects.filter(status__in=['OPEN', 'IN_PROGRESS', 'PENDING']).count()
+    closed_tickets = Ticket.objects.filter(status__in=['RESOLVED', 'CLOSED']).count()
+    total_companies = Company.objects.count()
+    total_users = User.objects.count()
+    
+    # Get recent tickets
+    recent_tickets = Ticket.objects.all().order_by('-created_at')[:10]
+    
+    # Get company-wise ticket distribution
+    company_stats = Company.objects.annotate(
+        ticket_count=Count('company_tickets')
+    ).order_by('-ticket_count')[:5]
+    
+    # Get status-wise ticket distribution
+    status_stats = Ticket.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('status')
+    
+    context = {
+        'total_tickets': total_tickets,
+        'open_tickets': open_tickets,
+        'closed_tickets': closed_tickets,
+        'total_companies': total_companies,
+        'total_users': total_users,
+        'recent_tickets': recent_tickets,
+        'company_stats': company_stats,
+        'status_stats': status_stats,
+    }
+    return render(request, 'admin/dashboard.html', context)
+
+@login_required
+@user_passes_test(is_staff_check)
+def admin_manage_companies(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        company_id = request.POST.get('company_id')
+        
+        if action == 'delete' and company_id:
+            company = get_object_or_404(Company, id=company_id)
+            company.delete()
+            messages.success(request, f'Company {company.name} has been deleted.')
+        else:
+            name = request.POST.get('name')
+            # Generate slug from company name
+            slug = name.lower().replace(' ', '-')
+            
+            if company_id:  # Edit existing company
+                company = get_object_or_404(Company, id=company_id)
+                company.name = name
+                company.slug = slug
+                company.save()
+                messages.success(request, f'Company {company.name} has been updated.')
+            else:  # Create new company
+                try:
+                    Company.objects.create(name=name, slug=slug)
+                    messages.success(request, f'New company {name} has been created.')
+                except IntegrityError:
+                    # If slug already exists, append a number
+                    base_slug = slug
+                    counter = 1
+                    while True:
+                        try:
+                            Company.objects.create(name=name, slug=f"{base_slug}-{counter}")
+                            messages.success(request, f'New company {name} has been created.')
+                            break
+                        except IntegrityError:
+                            counter += 1
+        
+        return redirect('admin_manage_companies')
+    
+    # GET request - display companies with their stats
+    companies = Company.objects.annotate(
+        total_tickets=Count('company_tickets', distinct=True),
+        open_tickets=Count(
+            'company_tickets',
+            filter=Q(company_tickets__status__in=['OPEN', 'IN_PROGRESS', 'PENDING']),
+            distinct=True
+        ),
+        total_users=Count('users', distinct=True)
+    ).order_by('name')
+    
+    return render(request, 'admin/manage_companies.html', {'companies': companies})
+
+@login_required
+@user_passes_test(is_staff_check)
+def admin_manage_users(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        user_id = request.POST.get('user_id')
+        
+        if action == 'delete' and user_id:
+            user = get_object_or_404(User, id=user_id)
+            username = user.username
+            user.delete()
+            messages.success(request, f'User {username} has been deleted.')
+        else:
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            company_id = request.POST.get('company')
+            is_staff = request.POST.get('is_staff') == 'on'
+            is_active = request.POST.get('is_active') == 'on'
+            
+            try:
+                company = Company.objects.get(id=company_id)
+                
+                if user_id:  # Edit existing user
+                    user = get_object_or_404(User, id=user_id)
+                    user.username = username
+                    user.email = email
+                    user.is_staff = is_staff
+                    user.is_active = is_active
+                    user.save()
+                    
+                    # Update profile
+                    user.profile.company = company
+                    user.profile.save()
+                    
+                    messages.success(request, f'User {username} has been updated.')
+                else:  # Create new user
+                    password = request.POST.get('password')
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        is_staff=is_staff,
+                        is_active=True
+                    )
+                    user.profile.company = company
+                    user.profile.save()
+                    messages.success(request, f'New user {username} has been created.')
+            except Company.DoesNotExist:
+                messages.error(request, 'Invalid company selected.')
+        
+        return redirect('admin_manage_users')
+    
+    # GET request - display users with their companies
+    users = User.objects.select_related('profile').all().order_by('username')
+    companies = Company.objects.all().order_by('name')
+    
+    return render(request, 'admin/manage_users.html', {
+        'users': users,
+        'companies': companies
+    })
+
+@login_required
+@user_passes_test(is_staff_check)
+def admin_manage_tickets(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        ticket_id = request.POST.get('ticket_id')
+        
+        if action == 'delete' and ticket_id:
+            ticket = get_object_or_404(Ticket, id=ticket_id)
+            ticket_title = ticket.title
+            ticket.delete()
+            messages.success(request, f'Ticket #{ticket_id} - {ticket_title} has been deleted.')
+        else:
+            title = request.POST.get('title')
+            status = request.POST.get('status')
+            priority = request.POST.get('priority')
+            company_id = request.POST.get('company')
+            
+            try:
+                company = Company.objects.get(id=company_id)
+                
+                if ticket_id:  # Edit existing ticket
+                    ticket = get_object_or_404(Ticket, id=ticket_id)
+                    ticket.title = title
+                    ticket.status = status
+                    ticket.priority = priority
+                    ticket.company = company
+                    ticket.save()
+                    messages.success(request, f'Ticket #{ticket_id} has been updated.')
+            except Company.DoesNotExist:
+                messages.error(request, 'Invalid company selected.')
+        
+        return redirect('admin_manage_tickets')
+    
+    # GET request - display tickets with filters
+    tickets = Ticket.objects.select_related('company', 'created_by').all()
+    
+    # Apply filters
+    status = request.GET.get('status')
+    priority = request.GET.get('priority')
+    company = request.GET.get('company')
+    search = request.GET.get('search')
+    
+    if status:
+        tickets = tickets.filter(status=status)
+    if priority:
+        tickets = tickets.filter(priority=priority)
+    if company:
+        tickets = tickets.filter(company_id=company)
+    if search:
+        tickets = tickets.filter(title__icontains=search)
+    
+    # Get choices for filters
+    status_choices = Ticket.STATUS_CHOICES
+    priority_choices = Ticket.PRIORITY
+    companies = Company.objects.all().order_by('name')
+    
+    return render(request, 'admin/manage_tickets.html', {
+        'tickets': tickets,
+        'status_choices': status_choices,
+        'priority_choices': priority_choices,
+        'companies': companies
+    })

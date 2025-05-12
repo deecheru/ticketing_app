@@ -49,7 +49,7 @@
                         <tbody>
                             {% for ticket in closed_tickets %}
                                 <tr>
-                                    <td>{{ ticket.ticket_id }}</td>
+                                    <td>{{ ticket.id  }}</td>
                                     <td>{{ ticket.title }}</td>
                                     <td>                                     
                                         {% if ticket.status == 'CLOSED' %}

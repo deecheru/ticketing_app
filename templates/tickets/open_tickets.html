@@ -21,7 +21,7 @@
                     <h5 class="mb-0 font-weight-bold text-dark">Open Tickets</h5>
                 </div>
                 <div class="col-auto">
-                    <a href="{% url 'create_ticket' %}" class="btn btn-primary btn-sm">
+                    <a href="{% url 'select_service' %}" class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle me-1"></i> Create New Ticket
                     </a>
                     <a href="?download=csv" class="btn btn-success btn-sm">
@@ -62,8 +62,8 @@
                                             <span class="badge bg-success">Open</span>
                                         {% elif ticket.status == 'IN_PROGRESS' %}
                                             <span class="badge bg-primary">In Progress</span>
-                                        {% elif ticket.status == 'PENDING' %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif ticket.status == 'RESOLVED' %}
+                                            <span class="badge bg-warning text-dark">Resolved</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -146,7 +146,7 @@
                             No open tickets found for your company.
                         {% endif %}
                     </p>
-                    <a href="{% url 'create_ticket' %}" class="btn btn-primary mt-2">
+                    <a href="{% url 'select_service' %}" class="btn btn-primary mt-2">
                         Create New Ticket
                     </a>
                 </div>

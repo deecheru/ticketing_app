@@ -67,6 +67,7 @@
                         <p class="mb-1"><strong>Category:</strong> {{ ticket.category }}</p>
                         <p class="mb-1"><strong>Impact:</strong> {{ ticket.get_impact_display }}</p>
                         <p class="mb-1"><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ ticket.status }}</p>
                     </div>
                     <div class="col-md-6">
                         <p class="mb-1"><strong>Assigned to:</strong> {{ ticket.assigned_to|default:"Not assigned" }}</p>

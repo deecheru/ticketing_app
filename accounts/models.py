@@ -6,18 +6,25 @@ class User(AbstractUser):
     """Custom user model for multi-tenant authentication"""
     # Add custom fields
     company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, related_name='users', blank=True)
+    is_company_agent = models.BooleanField(default=False, help_text="Designates whether this user is a company agent with special privileges")
     
     class Meta:
         permissions = [
             ("can_manage_users", "Can manage users"),
             ("can_manage_tickets", "Can manage tickets"),
             ("can_manage_company", "Can manage company"),
+            ("can_view_assigned_companies", "Can view tickets from assigned companies"),
+            ("can_manage_assigned_tickets", "Can manage tickets from assigned companies"),
         ]
     
     def has_perm(self, perm, obj=None):
         # Superusers have all permissions
         if self.is_superuser:
             return True
+        # Company agents have special permissions for their assigned companies
+        if self.is_company_agent and obj and hasattr(obj, 'company'):
+            if self.assigned_companies.filter(company=obj.company).exists():
+                return True
         # Staff users have all permissions within their company
         if self.is_staff and obj and hasattr(obj, 'company'):
             return obj.company == self.company
@@ -27,8 +34,8 @@ class User(AbstractUser):
         # Superusers have access to all modules
         if self.is_superuser:
             return True
-        # Staff users have access to all modules
-        if self.is_staff:
+        # Staff users and company agents have access to all modules
+        if self.is_staff or self.is_company_agent:
             return True
         return super().has_module_perms(app_label)
 
@@ -95,3 +102,18 @@ class Profile(models.Model):
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
+class StaffCompanyAssignment(models.Model):
+    """Model to track which companies a user is assigned to"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_companies')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='company_assignments_made')
+
+    class Meta:
+        unique_together = ('user', 'company')
+        verbose_name = 'Company Assignment'
+        verbose_name_plural = 'Company Assignments'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.company.name}"

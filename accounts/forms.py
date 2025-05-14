@@ -19,7 +19,7 @@ class ProfileUpdateForm(forms.ModelForm):
     """Form for updating profile information"""
     class Meta:
         model = Profile
-        fields = ['profile_picture', 'job_title', 'location', 'phone', 'timezone', 'language', 'email_notifications']
+        fields = ['profile_picture', 'job_title', 'location', 'phone', 'timezone', 'language']
 
 class UserUpdateForm(forms.ModelForm):
     """Form for updating basic user information"""

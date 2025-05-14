@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import ServiceFamily, ServiceType, ServiceCategory,Ticket,TicketAttachment,TicketComment
+from .models import ServiceFamily, ServiceType, ServiceCategory, Ticket, TicketAttachment, TicketComment
+from accounts.models import User, Company, Profile, StaffCompanyAssignment
 from .forms import *
-from django.contrib.auth.decorators import login_required,user_passes_test
-from accounts.models import User, Company, Profile
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .notifications import send_ticket_creation_notification, send_new_comment_notification,send_ticket_updated_notification   
+from .notifications import send_ticket_creation_notification, send_new_comment_notification, send_ticket_updated_notification   
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.db.models import Count
 from django.db.models import Q
@@ -15,6 +15,9 @@ from django.db.utils import IntegrityError
 def is_staff_check(user):
     return user.is_staff
 
+def is_company_agent_check(user):
+    return user.is_company_agent
+
 @login_required
 def select_service(request):
     user_company = request.user.company
@@ -22,6 +25,14 @@ def select_service(request):
     service_types = ServiceType.objects.filter(family__company=user_company)
     service_categories = ServiceCategory.objects.filter(service_type__family__company=user_company)
 
+    # Add this part to handle form submission from select_service page
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        if category_id:
+            # Redirect to create_ticket with the category ID
+            return redirect(f'/tickets/create-ticket/?category_id={category_id}')
+        else:
+            messages.warning(request, 'Please select a category first.')
 
     context = {
         'service_families': service_families,
@@ -32,63 +43,110 @@ def select_service(request):
 
 @login_required
 def create_ticket(request):
-    initial_category_id = request.GET.get('category')
+    user = request.user
+    initial_category_id = request.GET.get('category_id')
     initial_category = None
+    initial_service_type = None
+    initial_service_family = None
+    
     if initial_category_id:
         try:
-            initial_category = ServiceCategory.objects.get(id=initial_category_id)
+            # Get the initial category and its parent objects
+            initial_category = ServiceCategory.objects.filter(
+                service_type__family__company=user.company
+            ).get(id=initial_category_id)
+            
+            # Get the parent service type
+            initial_service_type = initial_category.service_type
+            
+            # Get the parent service family
+            initial_service_family = initial_service_type.family
         except ServiceCategory.DoesNotExist:
-            pass
+            messages.warning(request, 'Selected category not found.')
     
+    # Get admin user for assignment
+    admin_user = None
     try:
-        admin_user = User.objects.get(username='deecheru')  # Ensure this matches your admin username
+        admin_user = User.objects.get(username='deecheru')
     except User.DoesNotExist:
-        admin_user = None
-        print("Warning: Admin user not found. Tickets will not be automatically assigned.")
+        print("Warning: Admin user not found")
     
     if request.method == 'POST':
-        form = TicketForm(request.POST, user=request.user)
+        form = TicketForm(request.POST, user=user)
         comment_form = TicketCommentForm(request.POST)
-        files = request.FILES.getlist('attachments')
         
         if form.is_valid() and comment_form.is_valid():
-            ticket = form.save(commit=False)
-            ticket.created_by = request.user
-            ticket.company = request.user.company
-            if admin_user:
-                ticket.assigned_to = admin_user
-            ticket.save()
-            form.save_m2m()
-
-            comment_text = comment_form.cleaned_data.get('text')
-            if comment_text:
-                TicketComment.objects.create(
-                    ticket=ticket,
-                    text=comment_text,
-                    created_by=request.user
-                )
-
-            
-            # Process file attachments
-            for f in files:
-                attachment = TicketAttachment(
-                    ticket=ticket,
-                    file=f,
-                    filename=f.name,
-                    uploaded_by=request.user
-                )
-                attachment.save()
-            
-            messages.success(request, 'Ticket created successfully.')
-            return redirect('view_ticket', pk=ticket.pk)
-    else:
-        if initial_category:
-            form = TicketForm(user=request.user, initial={'category': initial_category})
+            try:
+                ticket = form.save(commit=False)
+                ticket.created_by = user
+                ticket.company = user.company  # Ensure company is set from the user
+                ticket.status = 'OPEN'  # Explicitly set status to OPEN
+                if admin_user:
+                    ticket.assigned_to = admin_user
+                ticket.save()
+                form.save_m2m()
+                
+                # Create initial comment if provided
+                if comment_form.cleaned_data['text']:
+                    TicketComment.objects.create(
+                        ticket=ticket,
+                        text=comment_form.cleaned_data['text'],
+                        created_by=user
+                    )
+                
+                # Handle file attachments
+                files = request.FILES.getlist('attachments')
+                for file in files:
+                    TicketAttachment.objects.create(
+                        ticket=ticket,
+                        file=file,
+                        filename=file.name,
+                        file_type=file.content_type,
+                        size=file.size,
+                        uploaded_by=user
+                    )
+                
+                messages.success(request, 'Ticket created successfully!')
+                return redirect('view_ticket', pk=ticket.id)
+            except Exception as e:
+                messages.error(request, f'Error creating ticket: {str(e)}')
         else:
-            form = TicketForm(user=request.user)
+            if form.errors:
+                error_messages = []
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        error_messages.append(f"{field}: {error}")
+            
+                # Send errors to messages
+                for error_message in error_messages:
+                    messages.error(request, error_message)
+
+                messages.error(request, 'Please correct the errors below.')
+    else:
+        # Initialize form with preselected values
+        initial_data = {}
+        
+        # If we have a valid initial category, set it and its parents in the initial data
+        if initial_category:
+            initial_data['category'] = initial_category.id
+            
+            if initial_service_type:
+                initial_data['service_type'] = initial_service_type.id
+                
+                if initial_service_family:
+                    initial_data['service_family'] = initial_service_family.id
+
+        form = TicketForm(user=user, initial=initial_data)
         comment_form = TicketCommentForm()
     
-    return render(request, 'tickets/create_ticket.html', {'form': form,  'comment_form': comment_form,})
+    # Pass all necessary data to the template
+    return render(request, 'tickets/create_ticket.html', {
+        'form': form,
+        'comment_form': comment_form,
+        'initial_category': initial_category,
+        'initial_service_type': initial_service_type,
+        'initial_service_family': initial_service_family
+    })
 
 @login_required
 def view_ticket(request, pk):
@@ -149,17 +207,24 @@ def view_open_tickets(request):
     user = request.user
     
     # For admin users, show all open tickets
-    if user.is_staff:
+    if user.is_superuser:
         open_tickets = Ticket.objects.filter(
-            status__in=['OPEN', 'IN_PROGRESS', 'PENDING']
+            status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']
+        ).order_by('-created_at')
+    # For company agents, show tickets from assigned companies
+    elif user.is_company_agent:
+        assigned_companies = user.assigned_companies.values_list('company', flat=True)
+        open_tickets = Ticket.objects.filter(
+            company__in=assigned_companies,
+            status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']
         ).order_by('-created_at')
     else:
-        # For regular users, show only their company's tickets
+        # For regular users, show all tickets from their company
         company = user.company
         open_tickets = Ticket.objects.filter(
-            company=company,
-            status__in=['OPEN', 'IN_PROGRESS', 'PENDING']
-        ).order_by('-created_at')
+                company=company,
+                status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']              
+            ).order_by('-created_at')
     
     # Handle CSV download
     if request.GET.get('download') == 'csv':
@@ -168,7 +233,8 @@ def view_open_tickets(request):
     context = {
         'open_tickets': open_tickets,
         'user': user,
-        'is_admin': user.is_staff
+        'is_admin': user.is_superuser,
+        'is_company_agent': user.is_company_agent
     }
     return render(request, 'tickets/open_tickets.html', context)
 
@@ -177,16 +243,23 @@ def view_closed_tickets(request):
     user = request.user
     
     # For admin users, show all closed tickets
-    if user.is_staff:
+    if user.is_superuser:
         closed_tickets = Ticket.objects.filter(
-            status__in=['RESOLVED', 'CLOSED']
+            status__in=['CLOSED']
+        ).order_by('-created_at')
+    # For company agents, show tickets from assigned companies
+    elif user.is_company_agent:
+        assigned_companies = user.assigned_companies.values_list('company', flat=True)
+        closed_tickets = Ticket.objects.filter(
+            company__in=assigned_companies,
+            status__in=['CLOSED']
         ).order_by('-created_at')
     else:
-        # For regular users, show only their company's tickets
+        # For regular users, show their company's tickets and tickets they created
         company = user.company
         closed_tickets = Ticket.objects.filter(
             company=company,
-            status__in=['RESOLVED', 'CLOSED']
+            status__in=['CLOSED']
         ).order_by('-created_at')
     
     # Handle CSV download
@@ -196,16 +269,24 @@ def view_closed_tickets(request):
     context = {
         'closed_tickets': closed_tickets,
         'user': user,
-        'is_admin': user.is_staff
+        'is_admin': user.is_superuser,
+        'is_company_agent': user.is_company_agent
     }
     return render(request, 'tickets/closed_tickets.html', context)
 
 @login_required
 def edit_ticket(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
+    user = request.user
 
     # Check if the current user has permission to edit the ticket
-    if not (request.user == ticket.created_by or request.user.is_staff):
+    can_edit = (
+        user.is_superuser or  # Admin can edit any ticket
+        user == ticket.created_by or  # Creator can edit their ticket
+        (user.is_company_agent and user.assigned_companies.filter(company=ticket.company).exists())  # Company agent can edit assigned company tickets
+    )
+
+    if not can_edit:
         messages.error(request, "You do not have permission to edit this ticket.")
         return redirect('view_ticket', pk=pk)
 
@@ -246,7 +327,7 @@ def edit_ticket(request, pk):
                     updated_ticket.assigned_to.username if updated_ticket.assigned_to else "None"
                 )
 
-            # Handle contacts changes - ensure we always have two values for template unpacking
+            # Handle contacts changes
             old_contacts = set(old_ticket.contacts.values_list('id', flat=True))
             new_contacts = set(updated_ticket.contacts.values_list('id', flat=True))
             added_contacts = new_contacts - old_contacts
@@ -255,11 +336,10 @@ def edit_ticket(request, pk):
             if added_contacts or removed_contacts:
                 added_names = [User.objects.get(id=user_id).username for user_id in added_contacts]
                 removed_names = [User.objects.get(id=user_id).username for user_id in removed_contacts]
-                
-                # Properly format as a tuple with two values
-                old_value = "None" if not removed_names else f"Included: {', '.join(removed_names)}"
-                new_value = "None" if not added_names else f"Added: {', '.join(added_names)}"
-                changes['Contacts'] = (old_value, new_value)
+                changes['Contacts'] = (
+                    "None" if not removed_names else f"Included: {', '.join(removed_names)}",
+                    "None" if not added_names else f"Added: {', '.join(added_names)}"
+                )
 
             # Only send notification if there were changes or new files
             if changes or files:
@@ -269,9 +349,16 @@ def edit_ticket(request, pk):
             return redirect('view_ticket', pk=updated_ticket.pk)
         else:
             messages.error(request, 'There was an error updating the ticket.')
+            print(form.errors)
     else:
         form = TicketForm(instance=ticket, user=request.user)
-    return render(request, 'tickets/edit_ticket.html', {'form': form, 'ticket': ticket})
+    
+    context = {
+        'form': form,
+        'ticket': ticket,
+        'is_company_agent': user.is_company_agent
+    }
+    return render(request, 'tickets/edit_ticket.html', context)
 
 
 #********************************#
@@ -524,3 +611,73 @@ def admin_manage_tickets(request):
         'priority_choices': priority_choices,
         'companies': companies
     })
+
+@login_required
+@user_passes_test(is_staff_check)
+def admin_manage_staff_companies(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user')
+        company_id = request.POST.get('company')
+        
+        if user_id and company_id:
+            user = get_object_or_404(User, id=user_id)
+            company = get_object_or_404(Company, id=company_id)
+            
+            # Check if assignment already exists
+            if not StaffCompanyAssignment.objects.filter(user=user, company=company).exists():
+                StaffCompanyAssignment.objects.create(
+                    user=user,
+                    company=company,
+                    assigned_by=request.user
+                )
+                messages.success(request, f'Company {company.name} has been assigned to {user.get_full_name() or user.username}.')
+            else:
+                messages.warning(request, 'This company is already assigned to the selected user.')
+    
+    # Get all users and companies
+    users = User.objects.filter(is_superuser=False)
+    companies = Company.objects.all().order_by('name')
+    assignments = StaffCompanyAssignment.objects.all().order_by('-assigned_at')
+    
+    context = {
+        'users': users,
+        'companies': companies,
+        'assignments': assignments
+    }
+    return render(request, 'admin/manage_staff_companies.html', context)
+
+@login_required
+@user_passes_test(is_staff_check)
+def remove_staff_company(request, assignment_id):
+    if request.method == 'POST':
+        assignment = get_object_or_404(StaffCompanyAssignment, id=assignment_id)
+        user = assignment.user
+        company = assignment.company
+        assignment.delete()
+        messages.success(request, f'Company {company.name} has been removed from {user.get_full_name() or user.username}.')
+    return redirect('admin_manage_staff_companies')
+
+@login_required
+def get_service_types(request):
+    family_id = request.GET.get('family_id')
+    if not family_id:
+        return JsonResponse([], safe=False)
+    
+    service_types = ServiceType.objects.filter(
+        family_id=family_id,
+        family__company=request.user.company
+    ).values('id', 'name')
+    
+    return JsonResponse(list(service_types), safe=False)
+
+def get_service_categories(request):
+    type_id = request.GET.get('type_id')
+    if not type_id:
+        return JsonResponse([], safe=False)
+    
+    categories = ServiceCategory.objects.filter(
+        service_type_id=type_id,
+        service_type__family__company=request.user.company
+    ).values('id', 'name')
+    
+    return JsonResponse(list(categories), safe=False)

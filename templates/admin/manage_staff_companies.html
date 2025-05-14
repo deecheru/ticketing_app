@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Company Agents{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Manage Company Agents</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label for="user">Select User</label>
+                                    <select name="user" id="user" class="form-control" required>
+                                        <option value="">Select a user...</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label for="company">Select Company</label>
+                                    <select name="company" id="company" class="form-control" required>
+                                        <option value="">Select a company...</option>
+                                        {% for company in companies %}
+                                            <option value="{{ company.id }}">{{ company.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block">Assign</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <h6 class="mb-3">Current Company Agents</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Agent</th>
+                                    <th>Company</th>
+                                    <th>Assigned By</th>
+                                    <th>Assigned At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in assignments %}
+                                <tr>
+                                    <td>
+                                        {{ assignment.user.get_full_name|default:assignment.user.username }}
+                                        {% if assignment.user.is_company_agent %}
+                                            <span class="badge bg-info">Agent</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ assignment.company.name }}</td>
+                                    <td>{{ assignment.assigned_by.get_full_name|default:assignment.assigned_by.username }}</td>
+                                    <td>{{ assignment.assigned_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'remove_staff_company' assignment.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this agent assignment?')">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No company agents found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -2,10 +2,10 @@
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from .models import User, Profile
+from .models import User, Profile, StaffCompanyAssignment
 from django.contrib import messages
-from .forms import LoginForm,UserUpdateForm, ProfileUpdateForm, CompanyCreationForm,UserCreationForm, MFAVerificationForm, ForgotPasswordForm, ResetPasswordForm
-from django.contrib.auth.decorators import login_required,user_passes_test
+from .forms import LoginForm, UserUpdateForm, ProfileUpdateForm, CompanyCreationForm, UserCreationForm, MFAVerificationForm, ForgotPasswordForm, ResetPasswordForm
+from django.contrib.auth.decorators import login_required, user_passes_test
 from user_tickets.models import Ticket
 from django.core.mail import send_mail
 from django.conf import settings
@@ -29,12 +29,12 @@ def login_view(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(request, username=username, password=password,backend='django.contrib.auth.backends.ModelBackend')
             if user is None:
                 # Try email as username
                 try:
                     user_obj = User.objects.get(email=username)
-                    user = authenticate(request, username=user_obj.username, password=password)
+                    user = authenticate(request, username=user_obj.username, password=password, backend='django.contrib.auth.backends.ModelBackend')
                 except User.DoesNotExist:
                     user = None
 
@@ -76,18 +76,20 @@ def dashboard_view(request):
     if request.user.is_superuser:  # Check if the user is an admin (superuser)
         open_ticket_count = Ticket.objects.exclude(status='CLOSED').count()
         closed_ticket_count = Ticket.objects.filter(status='CLOSED').count()
-        #all_open_tickets = Ticket.objects.exclude(status='CLOSED').order_by('-created_at') # Fetch all open tickets for admin
+    elif request.user.is_staff:  # Check if the user is a staff member
+        assigned_companies = StaffCompanyAssignment.objects.filter(staff_user=request.user).values_list('company', flat=True)
+        open_ticket_count = Ticket.objects.filter(company__in=assigned_companies).exclude(status='CLOSED').count()
+        closed_ticket_count = Ticket.objects.filter(company__in=assigned_companies, status='CLOSED').count()
     else:
         user_company = request.user.company
         open_ticket_count = Ticket.objects.filter(company=user_company).exclude(status='CLOSED').count()
         closed_ticket_count = Ticket.objects.filter(company=user_company, status='CLOSED').count()
-        #all_open_tickets = Ticket.objects.filter(company=user_company).exclude(status='CLOSED').order_by('-created_at')  
+    
     # Add any context data you want to pass to the template
     context = {
         'user': request.user,
         'open_ticket_count': open_ticket_count,
         'closed_ticket_count': closed_ticket_count,
-        # Add other dashboard data like ticket counts, recent tickets, etc.
     }
     
     return render(request, 'dashboard/dashboard.html', context)
@@ -279,6 +281,7 @@ def first_login_mfa(request):
                 user.profile.save()
                 
                 # Log the user in
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
                 login(request, user)
                 del request.session['first_login_user_id']
                 messages.success(request, 'Two-factor authentication has been set up successfully.')

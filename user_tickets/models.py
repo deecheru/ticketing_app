@@ -55,7 +55,6 @@ class Ticket(models.Model):
     STATUS_CHOICES = [
         ('OPEN', 'Open'),
         ('IN_PROGRESS', 'In Progress'),
-        ('PENDING', 'Pending'),
         ('RESOLVED', 'Resolved'),
         ('CLOSED', 'Closed'),
     ]
@@ -73,9 +72,9 @@ class Ticket(models.Model):
     
     # Core ticket fields
     title = models.CharField(max_length=255)
-    description = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Open')
-    impact = models.CharField(max_length=20, choices=IMPACT, default='Person')
+    description = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    impact = models.CharField(max_length=20, choices=IMPACT, default='PERSON')
     priority = models.CharField(max_length=20, choices=PRIORITY, default='MEDIUM')
     contacts = models.ManyToManyField(
         settings.AUTH_USER_MODEL,

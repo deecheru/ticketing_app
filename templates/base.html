@@ -30,7 +30,7 @@
                                 <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'create_ticket' %}">Create Ticket</a>
+                                <a class="nav-link" href="{% url 'select_service' %}">Create Ticket</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'open_tickets' %}">Open Tickets</a>
@@ -84,16 +84,7 @@
     </header>
 
     <main class="container py-4 flex-grow-1">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        
 
         {% block content %}{% endblock %}
     </main>  

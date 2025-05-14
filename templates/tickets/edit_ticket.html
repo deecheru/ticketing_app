@@ -5,265 +5,359 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="card">
-    <div class="card-header">
-      <h1 class="h3 mb-0">Edit Ticket #{{ ticket.id }}</h1>
-    </div>
-    
-    <div class="card-body">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="h3 mb-0">Edit Ticket #{{ ticket.id }}</h1>
+        </div>
 
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-          {{ form.non_field_errors }}
-        </div>
-        {% endif %}
-        
-        <!-- Title Field -->
-        <div class="mb-4">
-          <label for="{{ form.title.id_for_label }}" class="form-label">
-            Title <span class="text-danger">*</span>
-          </label>
-          {{ form.title }}
-          {% if form.title.errors %}
-          <div class="invalid-feedback d-block">
-            {{ form.title.errors }}
-          </div>
-          {% endif %}
-        </div>
-        
-        <!-- Description Field -->
-        <div class="mb-4">
-          <label for="{{ form.description.id_for_label }}" class="form-label">
-            Description <span class="text-danger">*</span>
-          </label>
-          {{ form.description }}
-          {% if form.description.errors %}
-          <div class="invalid-feedback d-block">
-            {{ form.description.errors }}
-          </div>
-          {% endif %}
-        </div>
-        
-        <!-- Category Field -->
-        <div class="mb-4">
-          <label for="{{ form.category.id_for_label }}" class="form-label">
-            Category <span class="text-danger">*</span>
-          </label>
-          {{ form.category }}
-          {% if form.category.errors %}
-          <div class="invalid-feedback d-block">
-            {{ form.category.errors }}
-          </div>
-          {% endif %}
-        </div>
-        
-        <!-- Impact and Priority Fields in a row -->
-        <div class="row mb-4">
-          <div class="col-md-6">
-            <label for="{{ form.impact.id_for_label }}" class="form-label">
-              Impact <span class="text-danger">*</span>
-            </label>
-            {{ form.impact }}
-            {% if form.impact.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.impact.errors }}
-            </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
             {% endif %}
-          </div>
-          
-          <div class="col-md-6">
-            <label for="{{ form.priority.id_for_label }}" class="form-label">
-              Priority <span class="text-danger">*</span>
-            </label>
-            {{ form.priority }}
-            {% if form.priority.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.priority.errors }}
-            </div>
-            {% endif %}
-          </div>
-        </div>
 
-        <!-- Status Field -->
-        <div class="mb-4">
-          <label for="{{ form.status.id_for_label }}" class="form-label">
-            Status <span class="text-danger">*</span>
-          </label>
-          {{ form.status }}
-          {% if form.status.errors %}
-          <div class="invalid-feedback d-block">
-            {{ form.status.errors }}
-          </div>
-          {% endif %}
-        </div>
-        
-        <!-- File Attachments -->
-        <div class="mb-4">
-          <label for="attachments" class="form-label">
-            Add New Attachments
-          </label>
-          <div class="input-group">
-            <input type="file" name="attachments" id="attachments" multiple 
-                   class="form-control" onchange="updateFileList(this)">
-          </div>
-          <div id="file-list" class="mt-2"></div>
-          <div class="form-text">You can select multiple files to upload.</div>
-        </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
 
-        <div class="mb-4">
-          <label for="{{ form.contacts.id_for_label }}" class="form-label">
-            Contacts (Tag people from your company)
-          </label>
-          {{ form.contacts }}
-          {% if form.contacts.errors %}
-          <div class="invalid-feedback d-block">
-            {{ form.contacts.errors }}
-          </div>
-          {% endif %}
-          <div class="form-text">{{ form.contacts.help_text }}</div>
-        </div>
-      
-        <div class="d-flex justify-content-between pt-3 border-top">
-          <a href="{% url 'view_ticket' ticket.id %}" class="btn btn-secondary">Cancel</a>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
 
-      {% if ticket.attachments.all %}
-        <div class="mt-4 border-top pt-3">
-          <h5 class="mb-3">Current Attachments</h5>
-          <div class="row g-2">
-            {% for attachment in ticket.attachments.all %}
-              <div class="col-sm-6">
-                <div class="border p-2 rounded d-flex align-items-center hover-bg-light">
-                  <div class="me-2">
-                    {% if attachment.get_extension == '.jpg' or attachment.get_extension == '.jpeg' or attachment.get_extension == '.png' or attachment.get_extension == '.gif' %}
-                      <i class="bi bi-file-image fs-4"></i>
-                    {% elif attachment.get_extension == '.pdf' %}
-                      <i class="bi bi-file-pdf fs-4"></i>
-                    {% elif attachment.get_extension == '.doc' or attachment.get_extension == '.docx' %}
-                      <i class="bi bi-file-word fs-4"></i>
-                    {% elif attachment.get_extension == '.xls' or attachment.get_extension == '.xlsx' %}
-                      <i class="bi bi-file-excel fs-4"></i>
-                    {% else %}
-                      <i class="bi bi-paperclip fs-4"></i>
+                <div class="mb-4">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        Title <span class="text-danger">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.title.errors }}
+                        </div>
                     {% endif %}
-                  </div>
-                  <div class="flex-grow-1 text-truncate">
-                    <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none">
-                      {{ attachment.filename }}
-                    </a>
-                    <div class="small text-muted">Uploaded {{ attachment.uploaded_at|date:"F j, Y" }}</div>
-                  </div>
                 </div>
-              </div>
-            {% endfor %}
-          </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.description.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="{{ form.service_family.id_for_label }}" class="form-label">
+                            Service Family <span class="text-danger">*</span>
+                        </label>
+                        {{ form.service_family }}
+                        {% if form.service_family.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.service_family.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="{{ form.service_type.id_for_label }}" class="form-label">
+                            Service Type <span class="text-danger">*</span>
+                        </label>
+                        {{ form.service_type }}
+                        {% if form.service_type.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.service_type.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.category.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="{{ form.impact.id_for_label }}" class="form-label">Impact</label>
+                        {{ form.impact }}
+                        {% if form.impact.errors %}
+                            <div class="invalid-feedback d-block">{{ form.impact.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                            <div class="invalid-feedback d-block">{{ form.priority.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="invalid-feedback d-block">{{ form.status.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="attachments" class="form-label">Add New Attachments</label>
+                    <div class="input-group">
+                        <input type="file" name="attachments" id="attachments" multiple class="form-control" onchange="updateFileList(this)">
+                    </div>
+                    <div id="file-list" class="mt-2"></div>
+                    <div class="form-text">You can select multiple files to upload.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.contacts.id_for_label }}" class="form-label">Contacts (Tag people from your company)</label>
+                    {{ form.contacts }}
+                    {% if form.contacts.errors %}
+                        <div class="invalid-feedback d-block">{{ form.contacts.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">{{ form.contacts.help_text }}</div>
+                </div>
+
+                <div class="d-flex justify-content-between pt-3 border-top">
+                    <a href="{% url 'view_ticket' ticket.id %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+
+            {% if ticket.attachments.all %}
+                <div class="mt-4 border-top pt-3">
+                    <h5 class="mb-3">Current Attachments</h5>
+                    <div class="row g-2">
+                        {% for attachment in ticket.attachments.all %}
+                            <div class="col-sm-6">
+                                <div class="border p-2 rounded d-flex align-items-center hover-bg-light">
+                                    <div class="me-2">
+                                        {% if attachment.get_extension == '.jpg' or attachment.get_extension == '.jpeg' or attachment.get_extension == '.png' or attachment.get_extension == '.gif' %}
+                                            <i class="bi bi-file-image fs-4"></i>
+                                        {% elif attachment.get_extension == '.pdf' %}
+                                            <i class="bi bi-file-pdf fs-4"></i>
+                                        {% elif attachment.get_extension == '.doc' or attachment.get_extension == '.docx' %}
+                                            <i class="bi bi-file-word fs-4"></i>
+                                        {% elif attachment.get_extension == '.xls' or attachment.get_extension == '.xlsx' %}
+                                            <i class="bi bi-file-excel fs-4"></i>
+                                        {% else %}
+                                            <i class="bi bi-paperclip fs-4"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 text-truncate">
+                                        <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none">
+                                            {{ attachment.filename }}
+                                        </a>
+                                        <div class="small text-muted">Uploaded {{ attachment.uploaded_at|date:"F j, Y" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
-      {% endif %}
     </div>
-  </div>
 </div>
 
 <style>
-  .select-wrapper {
-    position: relative;
-  }
-  
-  .select-wrapper::after {
-    content: '▼';
-    font-size: 12px;
-    color: #6c757d;
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  
-  .select-wrapper select {
-    appearance: none;
-    padding-right: 30px;
-  }
+    .select-wrapper {
+        position: relative;
+    }
+
+    .select-wrapper::after {
+        content: '▼';
+        font-size: 12px;
+        color: #6c757d;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .select-wrapper select {
+        appearance: none;
+        padding-right: 30px;
+    }
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Wrap select elements in a div with select-wrapper class, excluding contacts field
-    const selectFields = document.querySelectorAll('select:not([name="contacts"])');
-    selectFields.forEach(select => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'select-wrapper';
-      select.parentNode.insertBefore(wrapper, select);
-      wrapper.appendChild(select);
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wrap select elements
+        const selectFields = document.querySelectorAll('select:not([name="contacts"])');
+        selectFields.forEach(select => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'select-wrapper';
+            select.parentNode.insertBefore(wrapper, select);
+            wrapper.appendChild(select);
+        });
 
-    // Add form-control class to all form inputs
-    const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea, select');
-    formInputs.forEach(input => {
-      input.classList.add('form-control');
-      
-      if (input.tagName === 'TEXTAREA') {
-        input.rows = 5;
-      }
-    });
-  });
+        // Add form-control class
+        const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea, select');
+        formInputs.forEach(input => {
+            input.classList.add('form-control');
+            if (input.tagName === 'TEXTAREA') {
+                input.rows = 5;
+            }
+        });
 
-  // File upload handling
-  function updateFileList(input) {
-    const fileList = document.getElementById('file-list');
-    
-    fileList.innerHTML = '';
-    
-    if (input.files.length > 0) {
-      const listGroup = document.createElement('div');
-      listGroup.className = 'list-group mt-2';
-      
-      for (let i = 0; i < input.files.length; i++) {
-        const file = input.files[i];
-        const fileItem = document.createElement('div');
-        fileItem.className = 'list-group-item d-flex align-items-center';
-        
-        // Add file icon based on type
-        const icon = document.createElement('span');
-        icon.className = 'me-2';
-        if (file.type.includes('image')) {
-          icon.innerHTML = '📷';
-        } else if (file.type.includes('pdf')) {
-          icon.innerHTML = '📄';
-        } else {
-          icon.innerHTML = '📎';
+        const serviceFamilySelect = document.getElementById('id_service_family');
+        const serviceTypeSelect = document.getElementById('id_service_type');
+        const categorySelect = document.getElementById('id_category');
+
+        function updateServiceTypes(selectedTypeId) {
+            const familyId = serviceFamilySelect.value;
+            if (familyId) {
+                // Debug
+                console.log(`Fetching service types for family: ${familyId}`);
+                
+                fetch(`/user_tickets/api/service-types/?family_id=${familyId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Service types received:', data);
+                        
+                        serviceTypeSelect.innerHTML = '<option value="">---------</option>';
+                        data.forEach(type => {
+                            const option = new Option(type.name, type.id);
+                            serviceTypeSelect.add(option);
+                        });
+                        serviceTypeSelect.disabled = false;
+
+                        if (selectedTypeId) {
+                            console.log(`Setting service type to: ${selectedTypeId}`);
+                            serviceTypeSelect.value = selectedTypeId;
+                            updateCategories('{{ ticket.category.id }}');
+                        } else {
+                            updateCategories('');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching service types:', error);
+                        alert('Error loading service types. Please try again.');
+                    });
+            } else {
+                serviceTypeSelect.innerHTML = '<option value="">---------</option>';
+                serviceTypeSelect.disabled = true;
+                categorySelect.innerHTML = '<option value="">---------</option>';
+                categorySelect.disabled = true;
+            }
         }
-        
-        // Add file name and size
-        const fileInfo = document.createElement('span');
-        fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
-        
-        fileItem.appendChild(icon);
-        fileItem.appendChild(fileInfo);
-        listGroup.appendChild(fileItem);
-      }
-      
-      fileList.appendChild(listGroup);
+
+        function updateCategories(selectedCategoryId) {
+            const typeId = serviceTypeSelect.value;
+            if (typeId) {
+                console.log(`Fetching categories for service type: ${typeId}`);
+                
+                fetch(`/user_tickets/api/service-categories/?type_id=${typeId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Categories received:', data);
+                        
+                        categorySelect.innerHTML = '<option value="">---------</option>';
+                        data.forEach(category => {
+                            const option = new Option(category.name, category.id);
+                            categorySelect.add(option);
+                        });
+                        categorySelect.disabled = false;
+
+                        if (selectedCategoryId) {
+                            console.log(`Setting category to: ${selectedCategoryId}`);
+                            categorySelect.value = selectedCategoryId;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching categories:', error);
+                        alert('Error loading categories. Please try again.');
+                    });
+            } else {
+                categorySelect.innerHTML = '<option value="">---------</option>';
+                categorySelect.disabled = true;
+            }
+        }
+
+        serviceFamilySelect.addEventListener('change', () => updateServiceTypes(null));
+        serviceTypeSelect.addEventListener('change', () => updateCategories(null));
+
+        // Initialize on load to pre-select
+        if ('{{ ticket.category.service_type.family.id }}') {
+            console.log('Initializing form with pre-selected values');
+            console.log('Family ID:', '{{ ticket.category.service_type.family.id }}');
+            console.log('Type ID:', '{{ ticket.category.service_type.id }}');
+            console.log('Category ID:', '{{ ticket.category.id }}');
+            
+            // Set service family first
+            serviceFamilySelect.value = '{{ ticket.category.service_type.family.id }}';
+            
+            // After setting family, fetch types and then set the type
+            const typeId = '{{ ticket.category.service_type.id }}';
+            updateServiceTypes(typeId);
+        } else {
+            serviceTypeSelect.disabled = true;
+            categorySelect.disabled = true;
+        }
+    });
+
+    function updateFileList(input) {
+        const fileList = document.getElementById('file-list');
+        fileList.innerHTML = '';
+        if (input.files.length > 0) {
+            const listGroup = document.createElement('div');
+            listGroup.className = 'list-group mt-2';
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+                const fileItem = document.createElement('div');
+                fileItem.className = 'list-group-item d-flex align-items-center';
+                const icon = document.createElement('span');
+                icon.className = 'me-2';
+                if (file.type.includes('image')) {
+                    icon.innerHTML = '📷';
+                } else if (file.type.includes('pdf')) {
+                    icon.innerHTML = '📄';
+                } else {
+                    icon.innerHTML = '📎';
+                }
+                const fileInfo = document.createElement('span');
+                fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                fileItem.appendChild(icon);
+                fileItem.appendChild(fileInfo);
+                listGroup.appendChild(fileItem);
+            }
+            fileList.appendChild(listGroup);
+        }
     }
-  }
-  
-  function formatFileSize(bytes) {
-    if (bytes < 1024) {
-      return bytes + ' B';
-    } else if (bytes < 1024 * 1024) {
-      return (bytes / 1024).toFixed(1) + ' KB';
-    } else {
-      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) {
+            return bytes + ' B';
+        } else if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(1) + ' KB';
+        } else {
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
     }
-  }
 </script>
 {% endblock %}

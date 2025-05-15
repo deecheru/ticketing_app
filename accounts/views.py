@@ -76,8 +76,8 @@ def dashboard_view(request):
     if request.user.is_superuser:  # Check if the user is an admin (superuser)
         open_ticket_count = Ticket.objects.exclude(status='CLOSED').count()
         closed_ticket_count = Ticket.objects.filter(status='CLOSED').count()
-    elif request.user.is_staff:  # Check if the user is a staff member
-        assigned_companies = StaffCompanyAssignment.objects.filter(staff_user=request.user).values_list('company', flat=True)
+    elif request.user.is_staff or request.user.is_company_agent:  # Check if the user is a staff member
+        assigned_companies = StaffCompanyAssignment.objects.filter(user=request.user).values_list('company', flat=True)
         open_ticket_count = Ticket.objects.filter(company__in=assigned_companies).exclude(status='CLOSED').count()
         closed_ticket_count = Ticket.objects.filter(company__in=assigned_companies, status='CLOSED').count()
     else:

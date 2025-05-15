@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.db.models import Count
 from django.db.models import Q
 from django.db.utils import IntegrityError
+from django.db import models
 
 def is_staff_check(user):
     return user.is_staff
@@ -210,21 +211,39 @@ def view_open_tickets(request):
     if user.is_superuser:
         open_tickets = Ticket.objects.filter(
             status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']
-        ).order_by('-created_at')
+        )
     # For company agents, show tickets from assigned companies
     elif user.is_company_agent:
         assigned_companies = user.assigned_companies.values_list('company', flat=True)
         open_tickets = Ticket.objects.filter(
             company__in=assigned_companies,
             status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']
-        ).order_by('-created_at')
+        )
     else:
         # For regular users, show all tickets from their company
         company = user.company
         open_tickets = Ticket.objects.filter(
-                company=company,
-                status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']              
-            ).order_by('-created_at')
+            company=company,
+            status__in=['OPEN', 'IN_PROGRESS', 'RESOLVED']              
+        )
+    
+    # Handle search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        open_tickets = open_tickets.filter(
+            # Search across multiple fields
+            models.Q(title__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(id__icontains=search_query) |
+            models.Q(status__icontains=search_query) |
+            models.Q(priority__icontains=search_query) |
+            models.Q(created_by__username__icontains=search_query) |
+            models.Q(created_by__first_name__icontains=search_query) |
+            models.Q(created_by__last_name__icontains=search_query)
+        )
+    
+    # Apply ordering after search
+    open_tickets = open_tickets.order_by('-created_at')
     
     # Handle CSV download
     if request.GET.get('download') == 'csv':
@@ -234,7 +253,8 @@ def view_open_tickets(request):
         'open_tickets': open_tickets,
         'user': user,
         'is_admin': user.is_superuser,
-        'is_company_agent': user.is_company_agent
+        'is_company_agent': user.is_company_agent,
+        'search_query': search_query,  # Pass search query to template for display
     }
     return render(request, 'tickets/open_tickets.html', context)
 
@@ -244,23 +264,39 @@ def view_closed_tickets(request):
     
     # For admin users, show all closed tickets
     if user.is_superuser:
-        closed_tickets = Ticket.objects.filter(
-            status__in=['CLOSED']
-        ).order_by('-created_at')
+        closed_tickets = Ticket.objects.filter(status='CLOSED').order_by('-created_at')
     # For company agents, show tickets from assigned companies
     elif user.is_company_agent:
         assigned_companies = user.assigned_companies.values_list('company', flat=True)
         closed_tickets = Ticket.objects.filter(
             company__in=assigned_companies,
-            status__in=['CLOSED']
-        ).order_by('-created_at')
+            status='CLOSED'
+        )
     else:
-        # For regular users, show their company's tickets and tickets they created
+        # For regular users, show closed tickets from their company
         company = user.company
         closed_tickets = Ticket.objects.filter(
             company=company,
-            status__in=['CLOSED']
-        ).order_by('-created_at')
+            status='CLOSED'              
+        )
+    
+    # Handle search functionality - case-insensitive search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        closed_tickets = closed_tickets.filter(
+            # Search across multiple fields using icontains for case-insensitive matching
+            models.Q(title__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(id__icontains=search_query) |
+            models.Q(status__icontains=search_query) |
+            models.Q(priority__icontains=search_query) |
+            models.Q(created_by__username__icontains=search_query) |
+            models.Q(created_by__first_name__icontains=search_query) |
+            models.Q(created_by__last_name__icontains=search_query)
+        )
+    
+    # Apply ordering after search
+    closed_tickets = closed_tickets.order_by('-created_at')
     
     # Handle CSV download
     if request.GET.get('download') == 'csv':
@@ -270,7 +306,8 @@ def view_closed_tickets(request):
         'closed_tickets': closed_tickets,
         'user': user,
         'is_admin': user.is_superuser,
-        'is_company_agent': user.is_company_agent
+        'is_company_agent': user.is_company_agent,
+        'search_query': search_query,  # Pass search query to template for display
     }
     return render(request, 'tickets/closed_tickets.html', context)
 

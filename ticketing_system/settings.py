@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'widget_tweaks',
     'user_tickets',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [

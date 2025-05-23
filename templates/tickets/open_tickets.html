@@ -20,9 +20,11 @@
                     <h5 class="mb-0 font-weight-bold text-dark">Open Tickets</h5>
                 </div>
                 <div class="col-auto">
+                    {%if not user.is_company_agent%}
                     <a href="{% url 'select_service' %}" class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle me-1"></i> Create New Ticket
                     </a>
+                    {%endif%}
                     <a href="?download=csv{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-success btn-sm">
                         <i class="bi bi-download me-1"></i> Download CSV
                     </a>
@@ -91,7 +93,7 @@
                                         {% elif ticket.status == 'IN_PROGRESS' %}
                                             <span class="badge bg-primary">In Progress</span>
                                         {% elif ticket.status == 'RESOLVED' %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            <span class="badge bg-warning text-dark">Resolved</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -111,7 +113,7 @@
                                         <a href="{% url 'view_ticket' ticket.id %}" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-eye"></i> View
                                         </a>
-                                        {% if ticket.created_by == request.user or request.user.is_staff %}
+                                        {% if ticket.created_by == request.user or request.user.is_company_agent%}
                                         <a href="{% url 'edit_ticket' ticket.id %}" class="btn btn-sm btn-outline-secondary ms-1">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>

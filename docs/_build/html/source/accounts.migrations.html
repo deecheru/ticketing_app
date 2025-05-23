@@ -1,0 +1,471 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accounts.migrations package &mdash; ticketing application 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ticketing application
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">accounts.migrations package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-accounts.migrations.0001_initial">accounts.migrations.0001_initial module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0001_initial.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0001_initial.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0001_initial.Migration.initial"><code class="docutils literal notranslate"><span class="pre">Migration.initial</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0001_initial.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0002_profile">accounts.migrations.0002_profile module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0002_profile.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0002_profile.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0002_profile.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0003_rename_department_profile_location_and_more">accounts.migrations.0003_rename_department_profile_location_and_more module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0004_alter_profile_language">accounts.migrations.0004_alter_profile_language module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0004_alter_profile_language.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0004_alter_profile_language.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0004_alter_profile_language.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0005_alter_user_company">accounts.migrations.0005_alter_user_company module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0005_alter_user_company.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0005_alter_user_company.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0005_alter_user_company.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0006_alter_company_options_alter_profile_options_and_more">accounts.migrations.0006_alter_company_options_alter_profile_options_and_more module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0007_add_password_reset_fields">accounts.migrations.0007_add_password_reset_fields module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0007_add_password_reset_fields.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0007_add_password_reset_fields.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0007_add_password_reset_fields.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more">accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0008_profile_first_login_completed">accounts.migrations.0008_profile_first_login_completed module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0008_profile_first_login_completed.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0008_profile_first_login_completed.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0008_profile_first_login_completed.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0009_remove_profile_password_reset_token_and_more">accounts.migrations.0009_remove_profile_password_reset_token_and_more module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0010_merge_20250512_1734">accounts.migrations.0010_merge_20250512_1734 module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0010_merge_20250512_1734.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0010_merge_20250512_1734.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0010_merge_20250512_1734.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0011_staffcompanyassignment">accounts.migrations.0011_staffcompanyassignment module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0011_staffcompanyassignment.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0011_staffcompanyassignment.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0011_staffcompanyassignment.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations.0012_alter_staffcompanyassignment_options_and_more">accounts.migrations.0012_alter_staffcompanyassignment_options_and_more module</a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-accounts.migrations">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ticketing application</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">accounts.migrations package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/accounts.migrations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="accounts-migrations-package">
+<h1>accounts.migrations package<a class="headerlink" href="#accounts-migrations-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-accounts.migrations.0001_initial">
+<span id="accounts-migrations-0001-initial-module"></span><h2>accounts.migrations.0001_initial module<a class="headerlink" href="#module-accounts.migrations.0001_initial" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0001_initial.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0001_initial.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0001_initial.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0001_initial.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0001_initial.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('auth',</span> <span class="pre">'0012_alter_user_first_name_max_length')]</span></em><a class="headerlink" href="#accounts.migrations.0001_initial.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0001_initial.Migration.initial">
+<span class="sig-name descname"><span class="pre">initial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#accounts.migrations.0001_initial.Migration.initial" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0001_initial.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='Company',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('slug',</span> <span class="pre">&lt;django.db.models.fields.SlugField&gt;),</span> <span class="pre">('address',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('phone',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('is_active',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;)]&gt;,</span> <span class="pre">&lt;CreateModel</span>&#160; <span class="pre">name='User',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('password',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('last_login',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('is_superuser',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('username',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('first_name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('last_name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('email',</span> <span class="pre">&lt;django.db.models.fields.EmailField&gt;),</span> <span class="pre">('is_staff',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('is_active',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('date_joined',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('groups',</span> <span class="pre">&lt;django.db.models.fields.related.ManyToManyField&gt;),</span> <span class="pre">('user_permissions',</span> <span class="pre">&lt;django.db.models.fields.related.ManyToManyField&gt;),</span> <span class="pre">('company',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'user',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'users',</span> <span class="pre">'abstract':</span> <span class="pre">False},</span> <span class="pre">managers=[('objects',</span> <span class="pre">&lt;django.contrib.auth.models.UserManager</span> <span class="pre">object&gt;)]&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0001_initial.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0002_profile">
+<span id="accounts-migrations-0002-profile-module"></span><h2>accounts.migrations.0002_profile module<a class="headerlink" href="#module-accounts.migrations.0002_profile" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0002_profile.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0002_profile.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0002_profile.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0002_profile.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0002_profile.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0001_initial')]</span></em><a class="headerlink" href="#accounts.migrations.0002_profile.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0002_profile.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='Profile',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('role',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('job_title',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('department',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('phone',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('profile_picture',</span> <span class="pre">&lt;django.db.models.fields.files.ImageField&gt;),</span> <span class="pre">('bio',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('timezone',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('language',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('email_notifications',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('updated_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('user',</span> <span class="pre">&lt;django.db.models.fields.related.OneToOneField&gt;)]&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0002_profile.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0003_rename_department_profile_location_and_more">
+<span id="accounts-migrations-0003-rename-department-profile-location-and-more-module"></span><h2>accounts.migrations.0003_rename_department_profile_location_and_more module<a class="headerlink" href="#module-accounts.migrations.0003_rename_department_profile_location_and_more" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0003_rename_department_profile_location_and_more.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0003_rename_department_profile_location_and_more.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0003_rename_department_profile_location_and_more.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0003_rename_department_profile_location_and_more.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0002_profile')]</span></em><a class="headerlink" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0003_rename_department_profile_location_and_more.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RenameField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">old_name='department',</span> <span class="pre">new_name='location'&gt;,</span> <span class="pre">&lt;RemoveField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='bio'&gt;,</span> <span class="pre">&lt;RemoveField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='role'&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='profile_picture',</span> <span class="pre">field=&lt;django.db.models.fields.files.ImageField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0003_rename_department_profile_location_and_more.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0004_alter_profile_language">
+<span id="accounts-migrations-0004-alter-profile-language-module"></span><h2>accounts.migrations.0004_alter_profile_language module<a class="headerlink" href="#module-accounts.migrations.0004_alter_profile_language" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0004_alter_profile_language.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0004_alter_profile_language.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0004_alter_profile_language.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0004_alter_profile_language.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0004_alter_profile_language.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0003_rename_department_profile_location_and_more')]</span></em><a class="headerlink" href="#accounts.migrations.0004_alter_profile_language.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0004_alter_profile_language.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='language',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0004_alter_profile_language.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0005_alter_user_company">
+<span id="accounts-migrations-0005-alter-user-company-module"></span><h2>accounts.migrations.0005_alter_user_company module<a class="headerlink" href="#module-accounts.migrations.0005_alter_user_company" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0005_alter_user_company.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0005_alter_user_company.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0005_alter_user_company.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0005_alter_user_company.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0005_alter_user_company.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0004_alter_profile_language')]</span></em><a class="headerlink" href="#accounts.migrations.0005_alter_user_company.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0005_alter_user_company.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='user',</span> <span class="pre">name='company',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0005_alter_user_company.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0006_alter_company_options_alter_profile_options_and_more">
+<span id="accounts-migrations-0006-alter-company-options-alter-profile-options-and-more-module"></span><h2>accounts.migrations.0006_alter_company_options_alter_profile_options_and_more module<a class="headerlink" href="#module-accounts.migrations.0006_alter_company_options_alter_profile_options_and_more" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0006_alter_company_options_alter_profile_options_and_more.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0005_alter_user_company')]</span></em><a class="headerlink" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterModelOptions</span>&#160; <span class="pre">name='company',</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'Company',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'Companies'}&gt;,</span> <span class="pre">&lt;AlterModelOptions</span>&#160; <span class="pre">name='profile',</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'Profile',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'Profiles'}&gt;,</span> <span class="pre">&lt;AlterModelOptions</span>&#160; <span class="pre">name='user',</span> <span class="pre">options={'permissions':</span> <span class="pre">[('can_manage_users',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">users'),</span> <span class="pre">('can_manage_tickets',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">tickets'),</span> <span class="pre">('can_manage_company',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">company')]}&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token_created',</span> <span class="pre">field=&lt;django.db.models.fields.DateTimeField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0006_alter_company_options_alter_profile_options_and_more.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0007_add_password_reset_fields">
+<span id="accounts-migrations-0007-add-password-reset-fields-module"></span><h2>accounts.migrations.0007_add_password_reset_fields module<a class="headerlink" href="#module-accounts.migrations.0007_add_password_reset_fields" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0007_add_password_reset_fields.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0007_add_password_reset_fields.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0007_add_password_reset_fields.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0007_add_password_reset_fields.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0007_add_password_reset_fields.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0006_alter_company_options_alter_profile_options_and_more')]</span></em><a class="headerlink" href="#accounts.migrations.0007_add_password_reset_fields.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0007_add_password_reset_fields.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token_created',</span> <span class="pre">field=&lt;django.db.models.fields.DateTimeField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0007_add_password_reset_fields.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more">
+<span id="accounts-migrations-0007-profile-company-profile-mfa-enabled-and-more-module"></span><h2>accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more module<a class="headerlink" href="#module-accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0007_profile_company_profile_mfa_enabled_and_more.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0006_alter_company_options_alter_profile_options_and_more')]</span></em><a class="headerlink" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='company',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='mfa_enabled',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='mfa_secret',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='mfa_verified',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='phone_number',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='profile_picture',</span> <span class="pre">field=&lt;django.db.models.fields.files.ImageField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0007_profile_company_profile_mfa_enabled_and_more.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0008_profile_first_login_completed">
+<span id="accounts-migrations-0008-profile-first-login-completed-module"></span><h2>accounts.migrations.0008_profile_first_login_completed module<a class="headerlink" href="#module-accounts.migrations.0008_profile_first_login_completed" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0008_profile_first_login_completed.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0008_profile_first_login_completed.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0008_profile_first_login_completed.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0008_profile_first_login_completed.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0008_profile_first_login_completed.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0007_profile_company_profile_mfa_enabled_and_more')]</span></em><a class="headerlink" href="#accounts.migrations.0008_profile_first_login_completed.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0008_profile_first_login_completed.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='first_login_completed',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0008_profile_first_login_completed.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0009_remove_profile_password_reset_token_and_more">
+<span id="accounts-migrations-0009-remove-profile-password-reset-token-and-more-module"></span><h2>accounts.migrations.0009_remove_profile_password_reset_token_and_more module<a class="headerlink" href="#module-accounts.migrations.0009_remove_profile_password_reset_token_and_more" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0009_remove_profile_password_reset_token_and_more.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0009_remove_profile_password_reset_token_and_more.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0008_profile_first_login_completed')]</span></em><a class="headerlink" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RemoveField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token'&gt;,</span> <span class="pre">&lt;RemoveField</span>&#160; <span class="pre">model_name='profile',</span> <span class="pre">name='password_reset_token_created'&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0009_remove_profile_password_reset_token_and_more.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0010_merge_20250512_1734">
+<span id="accounts-migrations-0010-merge-20250512-1734-module"></span><h2>accounts.migrations.0010_merge_20250512_1734 module<a class="headerlink" href="#module-accounts.migrations.0010_merge_20250512_1734" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0010_merge_20250512_1734.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0010_merge_20250512_1734.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0010_merge_20250512_1734.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0010_merge_20250512_1734.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0010_merge_20250512_1734.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0007_add_password_reset_fields'),</span> <span class="pre">('accounts',</span> <span class="pre">'0009_remove_profile_password_reset_token_and_more')]</span></em><a class="headerlink" href="#accounts.migrations.0010_merge_20250512_1734.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0010_merge_20250512_1734.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#accounts.migrations.0010_merge_20250512_1734.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0011_staffcompanyassignment">
+<span id="accounts-migrations-0011-staffcompanyassignment-module"></span><h2>accounts.migrations.0011_staffcompanyassignment module<a class="headerlink" href="#module-accounts.migrations.0011_staffcompanyassignment" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0011_staffcompanyassignment.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0011_staffcompanyassignment.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0011_staffcompanyassignment.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0011_staffcompanyassignment.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0011_staffcompanyassignment.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0010_merge_20250512_1734')]</span></em><a class="headerlink" href="#accounts.migrations.0011_staffcompanyassignment.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0011_staffcompanyassignment.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='StaffCompanyAssignment',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('assigned_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('assigned_by',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('company',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('staff_user',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'Staff</span> <span class="pre">Company</span> <span class="pre">Assignment',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'Staff</span> <span class="pre">Company</span> <span class="pre">Assignments',</span> <span class="pre">'unique_together':</span> <span class="pre">{('staff_user',</span> <span class="pre">'company')}}&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0011_staffcompanyassignment.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations.0012_alter_staffcompanyassignment_options_and_more">
+<span id="accounts-migrations-0012-alter-staffcompanyassignment-options-and-more-module"></span><h2>accounts.migrations.0012_alter_staffcompanyassignment_options_and_more module<a class="headerlink" href="#module-accounts.migrations.0012_alter_staffcompanyassignment_options_and_more" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/accounts/migrations/0012_alter_staffcompanyassignment_options_and_more.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0011_staffcompanyassignment')]</span></em><a class="headerlink" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterModelOptions</span>&#160; <span class="pre">name='staffcompanyassignment',</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'Company</span> <span class="pre">Assignment',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'Company</span> <span class="pre">Assignments'}&gt;,</span> <span class="pre">&lt;AlterModelOptions</span>&#160; <span class="pre">name='user',</span> <span class="pre">options={'permissions':</span> <span class="pre">[('can_manage_users',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">users'),</span> <span class="pre">('can_manage_tickets',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">tickets'),</span> <span class="pre">('can_manage_company',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">company'),</span> <span class="pre">('can_view_assigned_companies',</span> <span class="pre">'Can</span> <span class="pre">view</span> <span class="pre">tickets</span> <span class="pre">from</span> <span class="pre">assigned</span> <span class="pre">companies'),</span> <span class="pre">('can_manage_assigned_tickets',</span> <span class="pre">'Can</span> <span class="pre">manage</span> <span class="pre">tickets</span> <span class="pre">from</span> <span class="pre">assigned</span> <span class="pre">companies')]}&gt;,</span> <span class="pre">&lt;RenameField</span>&#160; <span class="pre">model_name='staffcompanyassignment',</span> <span class="pre">old_name='staff_user',</span> <span class="pre">new_name='user'&gt;,</span> <span class="pre">&lt;AlterUniqueTogether</span>&#160; <span class="pre">name='staffcompanyassignment',</span> <span class="pre">unique_together=set()&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='user',</span> <span class="pre">name='is_company_agent',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='staffcompanyassignment',</span> <span class="pre">name='company',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;,</span> <span class="pre">&lt;AlterUniqueTogether</span>&#160; <span class="pre">name='staffcompanyassignment',</span> <span class="pre">unique_together={('user',</span> <span class="pre">'company')}&gt;]</span></em><a class="headerlink" href="#accounts.migrations.0012_alter_staffcompanyassignment_options_and_more.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-accounts.migrations">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-accounts.migrations" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, deepika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

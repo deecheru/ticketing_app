@@ -1,5 +1,5 @@
 from django import forms
-from .models import Ticket,ServiceCategory,ServiceFamily,ServiceType,TicketComment
+from .models import Ticket,ServiceCategory,ServiceFamily,ServiceType,TicketComment,User
 
 class TicketForm(forms.ModelForm):
     service_family = forms.ModelChoiceField(
@@ -17,7 +17,7 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ['title', 'description', 'impact', 'priority', 'category', 'contacts','status']
+        fields = ['title', 'description', 'impact', 'priority', 'category', 'contacts', 'status']
         
         widgets = {
             'contacts': forms.SelectMultiple(attrs={'class': 'form-select', 'multiple': True}),
@@ -33,38 +33,83 @@ class TicketForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
     
-        if user and user.company:
-            company = user.company
+        if user:
+            # Get the company based on user type
+            if user.is_company_agent:
+                # For company agents, get all assigned companies
+                assigned_companies = user.assigned_companies.values_list('company', flat=True)
+                if assigned_companies:
+                    # Set up service family queryset for all assigned companies
+                    self.fields['service_family'].queryset = ServiceFamily.objects.filter(company__in=assigned_companies)
+                    
+                    # Set up service type queryset based on selected family
+                    if 'service_family' in self.data:
+                        try:
+                            family_id = int(self.data.get('service_family'))
+                            self.fields['service_type'].queryset = ServiceType.objects.filter(family_id=family_id)
+                        except (ValueError, TypeError):
+                            pass
+                    
+                    # Filter categories to show those from assigned companies
+                    self.fields['category'].queryset = ServiceCategory.objects.filter(
+                        service_type__family__company__in=assigned_companies
+                    ).order_by('name')
+                    
+                    # Filter contacts to show users from assigned companies
+                    self.fields['contacts'].queryset = User.objects.filter(
+                        company__in=assigned_companies
+                    ).exclude(id=user.id)
+            else:
+                # For regular users, use their company
+                company = user.company
+                if company:
+                    # Set up service family queryset
+                    self.fields['service_family'].queryset = ServiceFamily.objects.filter(company=company)
+                    
+                    # Set up service type queryset based on selected family
+                    if 'service_family' in self.data:
+                        try:
+                            family_id = int(self.data.get('service_family'))
+                            self.fields['service_type'].queryset = ServiceType.objects.filter(family_id=family_id)
+                        except (ValueError, TypeError):
+                            pass
+                    
+                    # Filter categories to only show those from the user's company
+                    self.fields['category'].queryset = ServiceCategory.objects.filter(
+                        service_type__family__company=company
+                    ).order_by('name')
+                    
+                    # Filter contacts to only show users from the same company
+                    self.fields['contacts'].queryset = company.users.exclude(id=user.id)
             
-            # Set up service family queryset
-            self.fields['service_family'].queryset = ServiceFamily.objects.filter(company=company)
-            
-            # Set up service type queryset based on selected family
-            if 'service_family' in self.data:
-                try:
-                    family_id = int(self.data.get('service_family'))
-                    self.fields['service_type'].queryset = ServiceType.objects.filter(family_id=family_id)
-                except (ValueError, TypeError):
-                    pass
-            
-            # Filter categories to only show those from the user's company
-            self.fields['category'].queryset = ServiceCategory.objects.filter(
-                service_type__family__company=company
-            ).order_by('name')
-            
-            # Filter contacts to only show users from the same company
-            self.fields['contacts'].queryset = user.company.users.exclude(id=user.id)
             self.fields['contacts'].help_text = 'Hold Ctrl (Windows) or Command (Mac) to select or deselect multiple contacts.'
+            
             # If initial category is provided, set up the related querysets
             if 'initial' in kwargs and 'category' in kwargs['initial']:
                 category_id = kwargs['initial']['category']
                 try:
                     category_obj = ServiceCategory.objects.get(id=category_id)
-                    self.fields['service_family'].queryset = ServiceFamily.objects.filter(company=company)
-                    self.fields['service_type'].queryset = ServiceType.objects.filter(family=category_obj.service_type.family)
-                    self.fields['category'].queryset = ServiceCategory.objects.filter(service_type=category_obj.service_type)
+                    service_type_obj = category_obj.service_type
+                    service_family_obj = service_type_obj.family
+                    
+                    # Set the initial values
+                    self.initial['service_family'] = service_family_obj.id
+                    self.initial['service_type'] = service_type_obj.id
+                    self.initial['category'] = category_obj.id
+                    
+                    # Update the querysets to include the initial values
+                    if user.is_company_agent:
+                        self.fields['service_family'].queryset = ServiceFamily.objects.filter(
+                            company__in=assigned_companies
+                        )
+                    else:
+                        self.fields['service_family'].queryset = ServiceFamily.objects.filter(company=company)
+                    
+                    self.fields['service_type'].queryset = ServiceType.objects.filter(family=service_family_obj)
+                    self.fields['category'].queryset = ServiceCategory.objects.filter(service_type=service_type_obj)
                 except ServiceCategory.DoesNotExist:
                     pass
+            
             # Make description field optional
             self.fields['description'].required = False
     

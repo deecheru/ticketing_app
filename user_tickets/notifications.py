@@ -64,7 +64,7 @@ def send_new_comment_notification(comment):
     ticket = comment.ticket
     subject = f"[{ticket.company.name}] New Comment on Ticket: {ticket.title}"
     recipients = set()
-    if ticket.created_by and ticket.created_by.email and ticket.created_by != comment.created_by:
+    if ticket.created_by and ticket.created_by.email:
         recipients.add(ticket.created_by.email)
     if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to != comment.created_by:
         recipients.add(ticket.assigned_to.email)
@@ -138,5 +138,63 @@ def send_ticket_updated_notification(ticket, updated_by, changes=None, attachmen
         return True
     except Exception as e:
         # Log the error for debugging
+        print(f"Email sending failed: {e}")
+        return False
+
+# Add this new function to your notifications.py file
+    """
+    Send email notifications when contacts are tagged in a ticket:
+    1. Tagged contacts
+    2. Person who tagged
+    3. Ticket creator
+    4. Assigned person
+    """
+    recipients = set()
+
+    # Add tagged contacts
+    for contact in tagged_contacts:
+        if contact.email:
+            recipients.add(contact.email)
+    
+    # Add person who tagged
+    if tagged_by.email:
+        recipients.add(tagged_by.email)
+    
+    # Add ticket creator
+    if ticket.created_by and ticket.created_by.email:
+        recipients.add(ticket.created_by.email)
+    
+    # Add assigned person
+    if ticket.assigned_to and ticket.assigned_to.email:
+        recipients.add(ticket.assigned_to.email)
+
+    if not recipients:
+        return False
+
+    subject = f"[{ticket.company.name}] Contacts Tagged in Ticket: {ticket.title}"
+
+    context = {
+        'ticket': ticket,
+        'company': ticket.company,
+        'tagged_by': tagged_by,
+        'tagged_contacts': tagged_contacts,
+        'ticket_url': f"{settings.SITE_URL}/user_tickets/{ticket.id}/",
+    }
+
+    html_content = render_to_string('emails/contacts_tagged.html', context)
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=list(recipients)
+    )
+    email.attach_alternative(html_content, "text/html")
+
+    try:
+        email.send()
+        return True
+    except Exception as e:
         print(f"Email sending failed: {e}")
         return False

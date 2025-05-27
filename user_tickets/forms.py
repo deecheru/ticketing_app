@@ -34,31 +34,68 @@ class TicketForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
     
         if user:
-            # Get the company based on user type
+
             if user.is_company_agent:
                 # For company agents, get all assigned companies
                 assigned_companies = user.assigned_companies.values_list('company', flat=True)
                 if assigned_companies:
-                    # Set up service family queryset for all assigned companies
-                    self.fields['service_family'].queryset = ServiceFamily.objects.filter(company__in=assigned_companies)
-                    
-                    # Set up service type queryset based on selected family
-                    if 'service_family' in self.data:
+                    # If initial category is provided, set up the related querysets first
+                    if 'initial' in kwargs and 'category' in kwargs['initial']:
+                        category_id = kwargs['initial']['category']
                         try:
-                            family_id = int(self.data.get('service_family'))
-                            self.fields['service_type'].queryset = ServiceType.objects.filter(family_id=family_id)
-                        except (ValueError, TypeError):
+                            category_obj = ServiceCategory.objects.get(id=category_id)
+                            service_type_obj = category_obj.service_type
+                            service_family_obj = service_type_obj.family
+                            
+                            # Set the initial values
+                            self.initial['service_family'] = service_family_obj.id
+                            self.initial['service_type'] = service_type_obj.id
+                            self.initial['category'] = category_obj.id
+                            
+                            # Set up querysets with initial values
+                            self.fields['service_family'].queryset = ServiceFamily.objects.filter(
+                                company__in=assigned_companies
+                            )
+                            self.fields['service_type'].queryset = ServiceType.objects.filter(
+                                family=service_family_obj
+                            )
+                            self.fields['category'].queryset = ServiceCategory.objects.filter(
+                                service_type=service_type_obj
+                            )
+                        except ServiceCategory.DoesNotExist:
                             pass
-                    
-                    # Filter categories to show those from assigned companies
-                    self.fields['category'].queryset = ServiceCategory.objects.filter(
-                        service_type__family__company__in=assigned_companies
-                    ).order_by('name')
+                    else:
+                        # Set up service family queryset for all assigned companies
+                        self.fields['service_family'].queryset = ServiceFamily.objects.filter(
+                            company__in=assigned_companies
+                        )
+                        
+                        # Set up service type queryset based on selected family
+                        if 'service_family' in self.data:
+                            try:
+                                family_id = int(self.data.get('service_family'))
+                                self.fields['service_type'].queryset = ServiceType.objects.filter(family_id=family_id)
+                            except (ValueError, TypeError):
+                                pass
+                        
+                        if self.instance and self.instance.pk:
+                            ticket_company = self.instance.company
+                            self.fields['contacts'].queryset = User.objects.filter(
+                                company=ticket_company
+                            ).exclude(id=user.id)
+                        else:
+                            # For new tickets, show contacts from all assigned companies
+                            self.fields['contacts'].queryset = User.objects.filter(
+                                company__in=assigned_companies
+                            ).exclude(id=user.id)
+
                     
                     # Filter contacts to show users from assigned companies
-                    self.fields['contacts'].queryset = User.objects.filter(
-                        company__in=assigned_companies
-                    ).exclude(id=user.id)
+                   ## self.fields['contacts'].queryset = User.objects.filter(
+                        #company__in=assigned_companies
+                    #).exclude(id=user.id)
+            # Get the company based on user type
+           
             else:
                 # For regular users, use their company
                 company = user.company

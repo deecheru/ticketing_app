@@ -19,6 +19,7 @@ def is_staff_check(user):
 def is_company_agent_check(user):
     return user.is_company_agent
 
+
 @login_required
 def select_service(request):
     user_company = request.user.company
@@ -332,10 +333,13 @@ def edit_ticket(request, pk):
         files = request.FILES.getlist('attachments')
         if form.is_valid():
             old_ticket = Ticket.objects.get(pk=pk)
+            old_ticket_contacts = set(old_ticket.contacts.all())
+        
             updated_ticket = form.save(commit=False)
             updated_ticket.save()
             form.save_m2m()
-
+            new_ticket_contacts = set(updated_ticket.contacts.all())
+        
             # Handle attachments
             for f in files:
                 attachment = TicketAttachment(ticket=updated_ticket, file=f, filename=f.name, uploaded_by=request.user)
@@ -364,20 +368,20 @@ def edit_ticket(request, pk):
                     updated_ticket.assigned_to.username if updated_ticket.assigned_to else "None"
                 )
 
+            
             # Handle contacts changes
-            old_contacts = set(old_ticket.contacts.values_list('id', flat=True))
-            new_contacts = set(updated_ticket.contacts.values_list('id', flat=True))
-            added_contacts = new_contacts - old_contacts
-            removed_contacts = old_contacts - new_contacts
+            added_contacts = new_ticket_contacts - old_ticket_contacts
+            removed_contacts = old_ticket_contacts - new_ticket_contacts
+
+            
             
             if added_contacts or removed_contacts:
-                added_names = [User.objects.get(id=user_id).username for user_id in added_contacts]
-                removed_names = [User.objects.get(id=user_id).username for user_id in removed_contacts]
                 changes['Contacts'] = (
-                    "None" if not removed_names else f"Included: {', '.join(removed_names)}",
-                    "None" if not added_names else f"Added: {', '.join(added_names)}"
+                "None" if not removed_contacts else f"Removed: {', '.join(user.username for user in removed_contacts)}",
+                "None" if not added_contacts else f"Added: {', '.join(user.username for user in added_contacts)}"
                 )
 
+            #print("Changes detected:", changes)
             # Only send notification if there were changes or new files
             if changes or files:
                 send_ticket_updated_notification(updated_ticket, request.user, changes, files)
@@ -396,6 +400,7 @@ def edit_ticket(request, pk):
         'is_company_agent': user.is_company_agent
     }
     return render(request, 'tickets/edit_ticket.html', context)
+
 
 
 #********************************#
@@ -700,21 +705,49 @@ def get_service_types(request):
     if not family_id:
         return JsonResponse([], safe=False)
     
-    service_types = ServiceType.objects.filter(
-        family_id=family_id,
-        family__company=request.user.company
-    ).values('id', 'name')
-    
+    if request.user.is_company_agent:
+        # For company agents, get service types from their assigned companies
+        assigned_companies = request.user.assigned_companies.values_list('company', flat=True)
+        service_types = ServiceType.objects.filter(
+            family_id=family_id,
+            family__company__in=assigned_companies
+        ).values('id', 'name')
+    # elif request.user.is_superuser:
+    #     # For superusers, get all service types regardless of company
+    #     service_types = ServiceType.objects.filter(family_id=family_id).values('id', 'name')
+    else:
+        # For regular users, get service types from their company
+        service_types = ServiceType.objects.filter(
+            family_id=family_id,
+            family__company=request.user.company
+        ).values('id', 'name')
     return JsonResponse(list(service_types), safe=False)
+    
 
+
+
+@login_required
 def get_service_categories(request):
     type_id = request.GET.get('type_id')
     if not type_id:
         return JsonResponse([], safe=False)
     
-    categories = ServiceCategory.objects.filter(
-        service_type_id=type_id,
-        service_type__family__company=request.user.company
-    ).values('id', 'name')
+    if request.user.is_company_agent:
+        # For company agents, get categories from their assigned companies
+        assigned_companies = request.user.assigned_companies.values_list('company', flat=True)
+        categories = ServiceCategory.objects.filter(
+            service_type_id=type_id,
+            service_type__family__company__in=assigned_companies
+        ).values('id', 'name')
+    # elif request.user.is_superuser:
+    #     # For superusers, get all categories regardless of company
+    #     categories = ServiceCategory.objects.filter(service_type_id=type_id).values('id', 'name')
+    
+    else:
+        # For regular users, get categories from their company
+        categories = ServiceCategory.objects.filter(
+            service_type_id=type_id,
+            service_type__family__company=request.user.company
+        ).values('id', 'name')
     
     return JsonResponse(list(categories), safe=False)

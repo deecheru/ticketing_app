@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Select Service{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="h3 mb-0">Select Service Category</h1>
+    </div>
+    
+    <div class="card-body">
+      <!-- Change this line to specify the correct action URL -->
+      <form method="get" action="{% url 'create_ticket' %}">
+        {% csrf_token %}
+        
+        <!-- Service selection UI here -->
+        <div class="mb-4">
+          <label for="family_select" class="form-label">Service Family</label>
+          <select id="family_select" class="form-control" onchange="updateServiceTypes()">
+            <option value="">-- Select Service Family --</option>
+            {% for family in service_families %}
+              <option value="{{ family.id }}">{{ family.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mb-4">
+          <label for="type_select" class="form-label">Service Type</label>
+          <select id="type_select" class="form-control" onchange="updateCategories()" disabled>
+            <option value="">-- Select Service Type --</option>
+          </select>
+        </div>
+        
+        <div class="mb-4">
+          <label for="category_select" class="form-label">Category</label>
+          <select id="category_select" name="category_id" class="form-control" disabled>
+            <option value="">-- Select Category --</option>
+          </select>
+        </div>
+        
+        <div class="d-flex justify-content-between pt-3 border-top">
+          <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" id="continue_btn" disabled>Continue to Create Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Same JavaScript as before
+  document.addEventListener('DOMContentLoaded', function() {
+    const familySelect = document.getElementById('family_select');
+    const typeSelect = document.getElementById('type_select');
+    const categorySelect = document.getElementById('category_select');
+    const continueBtn = document.getElementById('continue_btn');
+    
+    // Function to update service types based on selected family
+    window.updateServiceTypes = function() {
+      const familyId = familySelect.value;
+      
+      if (familyId) {
+        // Fetch service types for the selected family
+        typeSelect.innerHTML = '<option value="">-- Select Service Type --</option>';
+        
+        // Filter service types from the already loaded data
+        const types = Array.from(document.querySelectorAll('#service_types_data option'))
+          .filter(option => option.dataset.familyId === familyId);
+        
+        types.forEach(type => {
+          const option = new Option(type.textContent, type.value);
+          typeSelect.add(option);
+        });
+        
+        typeSelect.disabled = false;
+        categorySelect.disabled = true;
+        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+        continueBtn.disabled = true;
+      } else {
+        typeSelect.disabled = true;
+        typeSelect.innerHTML = '<option value="">-- Select Service Type --</option>';
+        categorySelect.disabled = true;
+        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+        continueBtn.disabled = true;
+      }
+    };
+    
+    // Function to update categories based on selected service type
+    window.updateCategories = function() {
+      const typeId = typeSelect.value;
+      
+      if (typeId) {
+        // Fetch categories for the selected service type
+        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+        
+        // Filter categories from the already loaded data
+        const categories = Array.from(document.querySelectorAll('#service_categories_data option'))
+          .filter(option => option.dataset.typeId === typeId);
+        
+        categories.forEach(category => {
+          const option = new Option(category.textContent, category.value);
+          categorySelect.add(option);
+        });
+        
+        categorySelect.disabled = false;
+        continueBtn.disabled = true;
+      } else {
+        categorySelect.disabled = true;
+        categorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+        continueBtn.disabled = true;
+      }
+    };
+    
+    // Enable continue button when a category is selected
+    categorySelect.addEventListener('change', function() {
+      continueBtn.disabled = categorySelect.value === '';
+    });
+  });
+</script>
+
+<!-- Hidden data elements for UI population -->
+<select id="service_types_data" class="d-none">
+  {% for type in service_types %}
+    <option value="{{ type.id }}" data-family-id="{{ type.family.id }}">{{ type.name }}</option>
+  {% endfor %}
+</select>
+
+<select id="service_categories_data" class="d-none">
+  {% for category in service_categories %}
+    <option value="{{ category.id }}" data-type-id="{{ category.service_type.id }}">{{ category.name }}</option>
+  {% endfor %}
+</select>
+{% endblock %}

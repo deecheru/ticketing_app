@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>user_tickets.views &#8212; ticketing application 1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=29a6c3e3"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for user_tickets.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceFamily</span><span class="p">,</span> <span class="n">ServiceType</span><span class="p">,</span> <span class="n">ServiceCategory</span><span class="p">,</span> <span class="n">Ticket</span><span class="p">,</span> <span class="n">TicketAttachment</span><span class="p">,</span> <span class="n">TicketComment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accounts.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">Company</span><span class="p">,</span> <span class="n">Profile</span><span class="p">,</span> <span class="n">StaffCompanyAssignment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.forms</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">user_passes_test</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.notifications</span><span class="w"> </span><span class="kn">import</span> <span class="n">send_ticket_creation_notification</span><span class="p">,</span> <span class="n">send_new_comment_notification</span><span class="p">,</span> <span class="n">send_ticket_updated_notification</span>   
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.http</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpResponse</span><span class="p">,</span> <span class="n">JsonResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Count</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrityError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+
+<div class="viewcode-block" id="is_staff_check">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.is_staff_check">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_staff_check</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">is_staff</span></div>
+
+
+<div class="viewcode-block" id="is_company_agent_check">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.is_company_agent_check">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_company_agent_check</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span></div>
+
+
+<div class="viewcode-block" id="select_service">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.select_service">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_service</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user_company</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">company</span>
+    <span class="n">service_families</span> <span class="o">=</span> <span class="n">ServiceFamily</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">company</span><span class="o">=</span><span class="n">user_company</span><span class="p">)</span>
+    <span class="n">service_types</span> <span class="o">=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">family__company</span><span class="o">=</span><span class="n">user_company</span><span class="p">)</span>
+    <span class="n">service_categories</span> <span class="o">=</span> <span class="n">ServiceCategory</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">service_type__family__company</span><span class="o">=</span><span class="n">user_company</span><span class="p">)</span>
+
+    <span class="c1"># Add this part to handle form submission from select_service page</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">category_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;category_id&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">category_id</span><span class="p">:</span>
+            <span class="c1"># Redirect to create_ticket with the category ID</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;/tickets/create-ticket/?category_id=</span><span class="si">{</span><span class="n">category_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Please select a category first.&#39;</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;service_families&#39;</span><span class="p">:</span> <span class="n">service_families</span><span class="p">,</span>
+        <span class="s1">&#39;service_types&#39;</span><span class="p">:</span> <span class="n">service_types</span><span class="p">,</span>
+        <span class="s1">&#39;service_categories&#39;</span><span class="p">:</span> <span class="n">service_categories</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/select_service.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_ticket">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.create_ticket">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_ticket</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    <span class="n">initial_category_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;category_id&#39;</span><span class="p">)</span>
+    <span class="n">initial_category</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">initial_service_type</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">initial_service_family</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">if</span> <span class="n">initial_category_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Get the initial category and its parent objects</span>
+            <span class="n">initial_category</span> <span class="o">=</span> <span class="n">ServiceCategory</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                <span class="n">service_type__family__company</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">company</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">initial_category_id</span><span class="p">)</span>
+            
+            <span class="c1"># Get the parent service type</span>
+            <span class="n">initial_service_type</span> <span class="o">=</span> <span class="n">initial_category</span><span class="o">.</span><span class="n">service_type</span>
+            
+            <span class="c1"># Get the parent service family</span>
+            <span class="n">initial_service_family</span> <span class="o">=</span> <span class="n">initial_service_type</span><span class="o">.</span><span class="n">family</span>
+        <span class="k">except</span> <span class="n">ServiceCategory</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Selected category not found.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Get admin user for assignment</span>
+    <span class="n">admin_user</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">admin_user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;deecheru&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Admin user not found&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">TicketForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">comment_form</span> <span class="o">=</span> <span class="n">TicketCommentForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">comment_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ticket</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">ticket</span><span class="o">.</span><span class="n">created_by</span> <span class="o">=</span> <span class="n">user</span>
+                <span class="n">ticket</span><span class="o">.</span><span class="n">company</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company</span>  <span class="c1"># Ensure company is set from the user</span>
+                <span class="n">ticket</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;OPEN&#39;</span>  <span class="c1"># Explicitly set status to OPEN</span>
+                <span class="k">if</span> <span class="n">admin_user</span><span class="p">:</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">assigned_to</span> <span class="o">=</span> <span class="n">admin_user</span>
+                <span class="n">ticket</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">form</span><span class="o">.</span><span class="n">save_m2m</span><span class="p">()</span>
+                
+                <span class="c1"># Create initial comment if provided</span>
+                <span class="k">if</span> <span class="n">comment_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]:</span>
+                    <span class="n">TicketComment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                        <span class="n">ticket</span><span class="o">=</span><span class="n">ticket</span><span class="p">,</span>
+                        <span class="n">text</span><span class="o">=</span><span class="n">comment_form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">],</span>
+                        <span class="n">created_by</span><span class="o">=</span><span class="n">user</span>
+                    <span class="p">)</span>
+                
+                <span class="c1"># Handle file attachments</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;attachments&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">TicketAttachment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                        <span class="n">ticket</span><span class="o">=</span><span class="n">ticket</span><span class="p">,</span>
+                        <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
+                        <span class="n">filename</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">file_type</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">content_type</span><span class="p">,</span>
+                        <span class="n">size</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                        <span class="n">uploaded_by</span><span class="o">=</span><span class="n">user</span>
+                    <span class="p">)</span>
+                
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Ticket created successfully!&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;view_ticket&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">ticket</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Error creating ticket: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                <span class="n">error_messages</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">errors</span> <span class="ow">in</span> <span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+                        <span class="n">error_messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+                <span class="c1"># Send errors to messages</span>
+                <span class="k">for</span> <span class="n">error_message</span> <span class="ow">in</span> <span class="n">error_messages</span><span class="p">:</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Please correct the errors below.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Initialize form with preselected values</span>
+        <span class="n">initial_data</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># If we have a valid initial category, set it and its parents in the initial data</span>
+        <span class="k">if</span> <span class="n">initial_category</span><span class="p">:</span>
+            <span class="n">initial_data</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_category</span><span class="o">.</span><span class="n">id</span>
+            
+            <span class="k">if</span> <span class="n">initial_service_type</span><span class="p">:</span>
+                <span class="n">initial_data</span><span class="p">[</span><span class="s1">&#39;service_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_service_type</span><span class="o">.</span><span class="n">id</span>
+                
+                <span class="k">if</span> <span class="n">initial_service_family</span><span class="p">:</span>
+                    <span class="n">initial_data</span><span class="p">[</span><span class="s1">&#39;service_family&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_service_family</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="n">form</span> <span class="o">=</span> <span class="n">TicketForm</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">initial_data</span><span class="p">)</span>
+        <span class="n">comment_form</span> <span class="o">=</span> <span class="n">TicketCommentForm</span><span class="p">()</span>
+    
+    <span class="c1"># Pass all necessary data to the template</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/create_ticket.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;comment_form&#39;</span><span class="p">:</span> <span class="n">comment_form</span><span class="p">,</span>
+        <span class="s1">&#39;initial_category&#39;</span><span class="p">:</span> <span class="n">initial_category</span><span class="p">,</span>
+        <span class="s1">&#39;initial_service_type&#39;</span><span class="p">:</span> <span class="n">initial_service_type</span><span class="p">,</span>
+        <span class="s1">&#39;initial_service_family&#39;</span><span class="p">:</span> <span class="n">initial_service_family</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="view_ticket">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.view_ticket">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">view_ticket</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+    <span class="n">ticket</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Ticket</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="n">comment_form</span> <span class="o">=</span> <span class="n">TicketCommentForm</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">comment_form</span> <span class="o">=</span> <span class="n">TicketCommentForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comment_form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">new_comment</span> <span class="o">=</span> <span class="n">comment_form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">new_comment</span><span class="o">.</span><span class="n">ticket</span> <span class="o">=</span> <span class="n">ticket</span>
+            <span class="n">new_comment</span><span class="o">.</span><span class="n">created_by</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+            <span class="n">new_comment</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">send_new_comment_notification</span><span class="p">(</span><span class="n">new_comment</span><span class="p">)</span> 
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Comment added successfully.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;view_ticket&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+
+    <span class="c1"># Get the referrer URL</span>
+    <span class="n">referrer</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HTTP_REFERER&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">back_url</span> <span class="o">=</span> <span class="s1">&#39;dashboard&#39;</span>  <span class="c1"># Default fallback</span>
+    
+    <span class="c1"># Determine which page the user came from</span>
+    <span class="k">if</span> <span class="s1">&#39;open-tickets&#39;</span> <span class="ow">in</span> <span class="n">referrer</span><span class="p">:</span>
+        <span class="n">back_url</span> <span class="o">=</span> <span class="s1">&#39;open_tickets&#39;</span>
+    <span class="k">elif</span> <span class="s1">&#39;closed-tickets&#39;</span> <span class="ow">in</span> <span class="n">referrer</span><span class="p">:</span>
+        <span class="n">back_url</span> <span class="o">=</span> <span class="s1">&#39;closed_tickets&#39;</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;ticket&#39;</span><span class="p">:</span> <span class="n">ticket</span><span class="p">,</span>
+        <span class="s1">&#39;comment_form&#39;</span><span class="p">:</span> <span class="n">comment_form</span><span class="p">,</span>
+        <span class="s1">&#39;back_url&#39;</span><span class="p">:</span> <span class="n">back_url</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/view_ticket.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_ticket_csv">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.generate_ticket_csv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_ticket_csv</span><span class="p">(</span><span class="n">tickets</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/csv&#39;</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s1">&#39;Content-Disposition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;attachment; filename=&quot;tickets.csv&quot;&#39;</span>
+    
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;Ticket ID&#39;</span><span class="p">,</span> <span class="s1">&#39;Title&#39;</span><span class="p">,</span> <span class="s1">&#39;Status&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority&#39;</span><span class="p">,</span> <span class="s1">&#39;Created By&#39;</span><span class="p">,</span> <span class="s1">&#39;Created At&#39;</span><span class="p">,</span> <span class="s1">&#39;Assigned To&#39;</span><span class="p">,</span> <span class="s1">&#39;Category&#39;</span><span class="p">])</span>
+    
+    <span class="k">for</span> <span class="n">ticket</span> <span class="ow">in</span> <span class="n">tickets</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">get_status_display</span><span class="p">(),</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">get_priority_display</span><span class="p">(),</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">created_by</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span> <span class="k">if</span> <span class="n">ticket</span><span class="o">.</span><span class="n">created_by</span> <span class="k">else</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">,</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">created_at</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">),</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">assigned_to</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span> <span class="k">if</span> <span class="n">ticket</span><span class="o">.</span><span class="n">assigned_to</span> <span class="k">else</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">,</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">ticket</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="s1">&#39;Uncategorized&#39;</span>
+        <span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="view_open_tickets">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.view_open_tickets">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">view_open_tickets</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    
+    <span class="c1"># For admin users, show all open tickets</span>
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+        <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;IN_PROGRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;RESOLVED&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="c1"># For company agents, show tickets from assigned companies</span>
+    <span class="k">elif</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span><span class="p">:</span>
+        <span class="n">assigned_companies</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">assigned_companies</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">company__in</span><span class="o">=</span><span class="n">assigned_companies</span><span class="p">,</span>
+            <span class="n">status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;IN_PROGRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;RESOLVED&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For regular users, show all tickets from their company</span>
+        <span class="n">company</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company</span>
+        <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">company</span><span class="o">=</span><span class="n">company</span><span class="p">,</span>
+            <span class="n">status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;IN_PROGRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;RESOLVED&#39;</span><span class="p">]</span>              
+        <span class="p">)</span>
+    
+    <span class="c1"># Handle search functionality</span>
+    <span class="n">search_query</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_query</span><span class="p">:</span>
+        <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">open_tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="c1"># Search across multiple fields</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">title__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">description__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">id__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">status__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">priority__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__username__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__first_name__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__last_name__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># Apply ordering after search</span>
+    <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">open_tickets</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-created_at&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Handle CSV download</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;download&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">generate_ticket_csv</span><span class="p">(</span><span class="n">open_tickets</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;open_tickets&#39;</span><span class="p">:</span> <span class="n">open_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span>
+        <span class="s1">&#39;is_admin&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">,</span>
+        <span class="s1">&#39;is_company_agent&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span><span class="p">,</span>
+        <span class="s1">&#39;search_query&#39;</span><span class="p">:</span> <span class="n">search_query</span><span class="p">,</span>  <span class="c1"># Pass search query to template for display</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/open_tickets.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="view_closed_tickets">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.view_closed_tickets">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">view_closed_tickets</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+    
+    <span class="c1"># For admin users, show all closed tickets</span>
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">:</span>
+        <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s1">&#39;CLOSED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-created_at&#39;</span><span class="p">)</span>
+    <span class="c1"># For company agents, show tickets from assigned companies</span>
+    <span class="k">elif</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span><span class="p">:</span>
+        <span class="n">assigned_companies</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">assigned_companies</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">company__in</span><span class="o">=</span><span class="n">assigned_companies</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;CLOSED&#39;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For regular users, show closed tickets from their company</span>
+        <span class="n">company</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">company</span>
+        <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">company</span><span class="o">=</span><span class="n">company</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;CLOSED&#39;</span>              
+        <span class="p">)</span>
+    
+    <span class="c1"># Handle search functionality - case-insensitive search</span>
+    <span class="n">search_query</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_query</span><span class="p">:</span>
+        <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">closed_tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="c1"># Search across multiple fields using icontains for case-insensitive matching</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">title__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">description__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">id__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">status__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">priority__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__username__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__first_name__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span> <span class="o">|</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">Q</span><span class="p">(</span><span class="n">created_by__last_name__icontains</span><span class="o">=</span><span class="n">search_query</span><span class="p">)</span>
+        <span class="p">)</span>
+    
+    <span class="c1"># Apply ordering after search</span>
+    <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">closed_tickets</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-created_at&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Handle CSV download</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;download&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">generate_ticket_csv</span><span class="p">(</span><span class="n">closed_tickets</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;closed_tickets&#39;</span><span class="p">:</span> <span class="n">closed_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span>
+        <span class="s1">&#39;is_admin&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span><span class="p">,</span>
+        <span class="s1">&#39;is_company_agent&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span><span class="p">,</span>
+        <span class="s1">&#39;search_query&#39;</span><span class="p">:</span> <span class="n">search_query</span><span class="p">,</span>  <span class="c1"># Pass search query to template for display</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/closed_tickets.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="edit_ticket">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.edit_ticket">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">edit_ticket</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
+    <span class="n">ticket</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Ticket</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span>
+
+    <span class="c1"># Check if the current user has permission to edit the ticket</span>
+    <span class="n">can_edit</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">is_superuser</span> <span class="ow">or</span>  <span class="c1"># Admin can edit any ticket</span>
+        <span class="n">user</span> <span class="o">==</span> <span class="n">ticket</span><span class="o">.</span><span class="n">created_by</span> <span class="ow">or</span>  <span class="c1"># Creator can edit their ticket</span>
+        <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">assigned_companies</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">company</span><span class="o">=</span><span class="n">ticket</span><span class="o">.</span><span class="n">company</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>  <span class="c1"># Company agent can edit assigned company tickets</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">can_edit</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;You do not have permission to edit this ticket.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;view_ticket&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">TicketForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">ticket</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;attachments&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">old_ticket</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+            <span class="n">updated_ticket</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">updated_ticket</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save_m2m</span><span class="p">()</span>
+
+            <span class="c1"># Handle attachments</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">attachment</span> <span class="o">=</span> <span class="n">TicketAttachment</span><span class="p">(</span><span class="n">ticket</span><span class="o">=</span><span class="n">updated_ticket</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">uploaded_by</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+                <span class="n">attachment</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c1"># Detect changes for notification</span>
+            <span class="n">changes</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">title</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">title</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">description</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">status</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">get_status_display</span><span class="p">(),</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">get_status_display</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">priority</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">priority</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">get_priority_display</span><span class="p">(),</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">get_priority_display</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">category</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">old_ticket</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> 
+                    <span class="n">updated_ticket</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">impact</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">impact</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Impact&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">get_impact_display</span><span class="p">(),</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">get_impact_display</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">assigned_to</span> <span class="o">!=</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">assigned_to</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Assigned To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">old_ticket</span><span class="o">.</span><span class="n">assigned_to</span><span class="o">.</span><span class="n">username</span> <span class="k">if</span> <span class="n">old_ticket</span><span class="o">.</span><span class="n">assigned_to</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> 
+                    <span class="n">updated_ticket</span><span class="o">.</span><span class="n">assigned_to</span><span class="o">.</span><span class="n">username</span> <span class="k">if</span> <span class="n">updated_ticket</span><span class="o">.</span><span class="n">assigned_to</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Handle contacts changes</span>
+            <span class="n">old_contacts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">old_ticket</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">new_contacts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">updated_ticket</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">values_list</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">added_contacts</span> <span class="o">=</span> <span class="n">new_contacts</span> <span class="o">-</span> <span class="n">old_contacts</span>
+            <span class="n">removed_contacts</span> <span class="o">=</span> <span class="n">old_contacts</span> <span class="o">-</span> <span class="n">new_contacts</span>
+            
+            <span class="k">if</span> <span class="n">added_contacts</span> <span class="ow">or</span> <span class="n">removed_contacts</span><span class="p">:</span>
+                <span class="n">added_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span><span class="o">.</span><span class="n">username</span> <span class="k">for</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="n">added_contacts</span><span class="p">]</span>
+                <span class="n">removed_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span><span class="o">.</span><span class="n">username</span> <span class="k">for</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="n">removed_contacts</span><span class="p">]</span>
+                <span class="n">changes</span><span class="p">[</span><span class="s1">&#39;Contacts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;None&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">removed_names</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Included: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">removed_names</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;None&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">added_names</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Added: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">added_names</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Only send notification if there were changes or new files</span>
+            <span class="k">if</span> <span class="n">changes</span> <span class="ow">or</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">send_ticket_updated_notification</span><span class="p">(</span><span class="n">updated_ticket</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">changes</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Ticket updated successfully.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;view_ticket&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">updated_ticket</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;There was an error updating the ticket.&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">TicketForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">ticket</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+        <span class="s1">&#39;ticket&#39;</span><span class="p">:</span> <span class="n">ticket</span><span class="p">,</span>
+        <span class="s1">&#39;is_company_agent&#39;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">is_company_agent</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/edit_ticket.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#********************************#</span>
+<div class="viewcode-block" id="add_service_family">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.add_service_family">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_service_family</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceFamilyCreationForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">)</span>  <span class="c1"># Replace with your success URL</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceFamilyCreationForm</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/add_service_family.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="add_service_type">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.add_service_type">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_service_type</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceTypeCreationForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">)</span>  <span class="c1"># Replace with your success URL</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceTypeCreationForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/add_service_type.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="add_service_category">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.add_service_category">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_service_category</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceCategoryCreationForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">)</span>  <span class="c1"># Replace with your success URL</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ServiceCategoryCreationForm</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;tickets/add_service_category.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="admin_dashboard">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.admin_dashboard">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_dashboard</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># Get statistics</span>
+    <span class="n">total_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">open_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;IN_PROGRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;PENDING&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">closed_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;RESOLVED&#39;</span><span class="p">,</span> <span class="s1">&#39;CLOSED&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_companies</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">total_users</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    
+    <span class="c1"># Get recent tickets</span>
+    <span class="n">recent_tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-created_at&#39;</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
+    
+    <span class="c1"># Get company-wise ticket distribution</span>
+    <span class="n">company_stats</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">ticket_count</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;company_tickets&#39;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-ticket_count&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+    
+    <span class="c1"># Get status-wise ticket distribution</span>
+    <span class="n">status_stats</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">count</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;total_tickets&#39;</span><span class="p">:</span> <span class="n">total_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;open_tickets&#39;</span><span class="p">:</span> <span class="n">open_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;closed_tickets&#39;</span><span class="p">:</span> <span class="n">closed_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;total_companies&#39;</span><span class="p">:</span> <span class="n">total_companies</span><span class="p">,</span>
+        <span class="s1">&#39;total_users&#39;</span><span class="p">:</span> <span class="n">total_users</span><span class="p">,</span>
+        <span class="s1">&#39;recent_tickets&#39;</span><span class="p">:</span> <span class="n">recent_tickets</span><span class="p">,</span>
+        <span class="s1">&#39;company_stats&#39;</span><span class="p">:</span> <span class="n">company_stats</span><span class="p">,</span>
+        <span class="s1">&#39;status_stats&#39;</span><span class="p">:</span> <span class="n">status_stats</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;admin/dashboard.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="admin_manage_companies">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.admin_manage_companies">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_manage_companies</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+        <span class="n">company_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;company_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span> <span class="ow">and</span> <span class="n">company_id</span><span class="p">:</span>
+            <span class="n">company</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Company</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">company_id</span><span class="p">)</span>
+            <span class="n">company</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Company </span><span class="si">{</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been deleted.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+            <span class="c1"># Generate slug from company name</span>
+            <span class="n">slug</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">company_id</span><span class="p">:</span>  <span class="c1"># Edit existing company</span>
+                <span class="n">company</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Company</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">company_id</span><span class="p">)</span>
+                <span class="n">company</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="n">company</span><span class="o">.</span><span class="n">slug</span> <span class="o">=</span> <span class="n">slug</span>
+                <span class="n">company</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Company </span><span class="si">{</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been updated.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Create new company</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="n">slug</span><span class="p">)</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;New company </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been created.&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+                    <span class="c1"># If slug already exists, append a number</span>
+                    <span class="n">base_slug</span> <span class="o">=</span> <span class="n">slug</span>
+                    <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">slug</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_slug</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;New company </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been created.&#39;</span><span class="p">)</span>
+                            <span class="k">break</span>
+                        <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+                            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;admin_manage_companies&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># GET request - display companies with their stats</span>
+    <span class="n">companies</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+        <span class="n">total_tickets</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;company_tickets&#39;</span><span class="p">,</span> <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">open_tickets</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span>
+            <span class="s1">&#39;company_tickets&#39;</span><span class="p">,</span>
+            <span class="nb">filter</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">company_tickets__status__in</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OPEN&#39;</span><span class="p">,</span> <span class="s1">&#39;IN_PROGRESS&#39;</span><span class="p">,</span> <span class="s1">&#39;PENDING&#39;</span><span class="p">]),</span>
+            <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">),</span>
+        <span class="n">total_users</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;admin/manage_companies.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;companies&#39;</span><span class="p">:</span> <span class="n">companies</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="admin_manage_users">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.admin_manage_users">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_manage_users</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span> <span class="ow">and</span> <span class="n">user_id</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;User </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1"> has been deleted.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+            <span class="n">email</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">)</span>
+            <span class="n">company_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">)</span>
+            <span class="n">is_staff</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_staff&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span>
+            <span class="n">is_active</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;is_active&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;on&#39;</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">company</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">company_id</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">user_id</span><span class="p">:</span>  <span class="c1"># Edit existing user</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">is_staff</span> <span class="o">=</span> <span class="n">is_staff</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">is_active</span> <span class="o">=</span> <span class="n">is_active</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    
+                    <span class="c1"># Update profile</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">company</span> <span class="o">=</span> <span class="n">company</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;User </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1"> has been updated.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Create new user</span>
+                    <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">)</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create_user</span><span class="p">(</span>
+                        <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                        <span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span>
+                        <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
+                        <span class="n">is_staff</span><span class="o">=</span><span class="n">is_staff</span><span class="p">,</span>
+                        <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">company</span> <span class="o">=</span> <span class="n">company</span>
+                    <span class="n">user</span><span class="o">.</span><span class="n">profile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;New user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1"> has been created.&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Company</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Invalid company selected.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;admin_manage_users&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># GET request - display users with their companies</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s1">&#39;profile&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+    <span class="n">companies</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;admin/manage_users.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;users&#39;</span><span class="p">:</span> <span class="n">users</span><span class="p">,</span>
+        <span class="s1">&#39;companies&#39;</span><span class="p">:</span> <span class="n">companies</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="admin_manage_tickets">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.admin_manage_tickets">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_manage_tickets</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+        <span class="n">ticket_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ticket_id&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span> <span class="ow">and</span> <span class="n">ticket_id</span><span class="p">:</span>
+            <span class="n">ticket</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Ticket</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">ticket_id</span><span class="p">)</span>
+            <span class="n">ticket_title</span> <span class="o">=</span> <span class="n">ticket</span><span class="o">.</span><span class="n">title</span>
+            <span class="n">ticket</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Ticket #</span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">ticket_title</span><span class="si">}</span><span class="s1"> has been deleted.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;priority&#39;</span><span class="p">)</span>
+            <span class="n">company_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">)</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">company</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">company_id</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">ticket_id</span><span class="p">:</span>  <span class="c1"># Edit existing ticket</span>
+                    <span class="n">ticket</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Ticket</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">ticket_id</span><span class="p">)</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">company</span> <span class="o">=</span> <span class="n">company</span>
+                    <span class="n">ticket</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Ticket #</span><span class="si">{</span><span class="n">ticket_id</span><span class="si">}</span><span class="s1"> has been updated.&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Company</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;Invalid company selected.&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;admin_manage_tickets&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># GET request - display tickets with filters</span>
+    <span class="n">tickets</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">,</span> <span class="s1">&#39;created_by&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    
+    <span class="c1"># Apply filters</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+    <span class="n">priority</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;priority&#39;</span><span class="p">)</span>
+    <span class="n">company</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">)</span>
+    <span class="n">search</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">tickets</span> <span class="o">=</span> <span class="n">tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">priority</span><span class="p">:</span>
+        <span class="n">tickets</span> <span class="o">=</span> <span class="n">tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">company</span><span class="p">:</span>
+        <span class="n">tickets</span> <span class="o">=</span> <span class="n">tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">company_id</span><span class="o">=</span><span class="n">company</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
+        <span class="n">tickets</span> <span class="o">=</span> <span class="n">tickets</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+    
+    <span class="c1"># Get choices for filters</span>
+    <span class="n">status_choices</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">STATUS_CHOICES</span>
+    <span class="n">priority_choices</span> <span class="o">=</span> <span class="n">Ticket</span><span class="o">.</span><span class="n">PRIORITY</span>
+    <span class="n">companies</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;admin/manage_tickets.html&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;tickets&#39;</span><span class="p">:</span> <span class="n">tickets</span><span class="p">,</span>
+        <span class="s1">&#39;status_choices&#39;</span><span class="p">:</span> <span class="n">status_choices</span><span class="p">,</span>
+        <span class="s1">&#39;priority_choices&#39;</span><span class="p">:</span> <span class="n">priority_choices</span><span class="p">,</span>
+        <span class="s1">&#39;companies&#39;</span><span class="p">:</span> <span class="n">companies</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="admin_manage_staff_companies">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.admin_manage_staff_companies">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_manage_staff_companies</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+        <span class="n">company_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;company&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">user_id</span> <span class="ow">and</span> <span class="n">company_id</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="n">company</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Company</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">company_id</span><span class="p">)</span>
+            
+            <span class="c1"># Check if assignment already exists</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">StaffCompanyAssignment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">company</span><span class="o">=</span><span class="n">company</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">StaffCompanyAssignment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span>
+                    <span class="n">company</span><span class="o">=</span><span class="n">company</span><span class="p">,</span>
+                    <span class="n">assigned_by</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span>
+                <span class="p">)</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Company </span><span class="si">{</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been assigned to </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;This company is already assigned to the selected user.&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Get all users and companies</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_superuser</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">companies</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    <span class="n">assignments</span> <span class="o">=</span> <span class="n">StaffCompanyAssignment</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-assigned_at&#39;</span><span class="p">)</span>
+    
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;users&#39;</span><span class="p">:</span> <span class="n">users</span><span class="p">,</span>
+        <span class="s1">&#39;companies&#39;</span><span class="p">:</span> <span class="n">companies</span><span class="p">,</span>
+        <span class="s1">&#39;assignments&#39;</span><span class="p">:</span> <span class="n">assignments</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;admin/manage_staff_companies.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="remove_staff_company">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.remove_staff_company">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="nd">@user_passes_test</span><span class="p">(</span><span class="n">is_staff_check</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_staff_company</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">assignment_id</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">assignment</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">StaffCompanyAssignment</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">assignment_id</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">user</span>
+        <span class="n">company</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">company</span>
+        <span class="n">assignment</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">success</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Company </span><span class="si">{</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been removed from </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">get_full_name</span><span class="p">()</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;admin_manage_staff_companies&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_service_types">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.get_service_types">[docs]</a>
+<span class="nd">@login_required</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_service_types</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">family_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;family_id&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">family_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">([],</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">service_types</span> <span class="o">=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">family_id</span><span class="o">=</span><span class="n">family_id</span><span class="p">,</span>
+        <span class="n">family__company</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">company</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">service_types</span><span class="p">),</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_service_categories">
+<a class="viewcode-back" href="../../source/user_tickets.html#user_tickets.views.get_service_categories">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_service_categories</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">type_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type_id&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">type_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">([],</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    
+    <span class="n">categories</span> <span class="o">=</span> <span class="n">ServiceCategory</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">service_type_id</span><span class="o">=</span><span class="n">type_id</span><span class="p">,</span>
+        <span class="n">service_type__family__company</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">company</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">categories</span><span class="p">),</span> <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">ticketing application</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, deepika.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

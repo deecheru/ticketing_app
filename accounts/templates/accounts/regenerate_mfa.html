@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Regenerate MFA Code</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <h5>Set Up New Authenticator Code</h5>
+                        <p>Follow these steps:</p>
+                        <ol>
+                            <li>Open your Google Authenticator app</li>
+                            <li>Tap the + button to add a new account</li>
+                            <li>Scan the QR code below or enter the code manually</li>
+                            <li>Enter the 6-digit code from your app to verify</li>
+                        </ol>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <p>Scan this QR code with your Google Authenticator app:</p>
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid mb-3">
+                        <p class="text-muted">Or enter this code manually: <code>{{ secret }}</code></p>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.verification_code.id_for_label }}" class="form-label">Verification Code</label>
+                            {{ form.verification_code }}
+                            {% if form.verification_code.errors %}
+                            <div class="text-danger">
+                                {{ form.verification_code.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Enter the 6-digit code from your Google Authenticator app to verify the new setup
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Verify New Code</button>
+                            {% if is_login %}
+                                <a href="{% url 'verify_mfa_login' %}" class="btn btn-secondary">Back to Login</a>
+                            {% else %}
+                                <a href="{% url 'profile_view' %}" class="btn btn-secondary">Back to Profile</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

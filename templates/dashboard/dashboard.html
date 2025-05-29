@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <h1>Welcome, {{ user.username }}</h1>
+    <h1>Welcome, {{ user.get_full_name }}</h1>
     
     <div class="row">
         <div class="col-md-4">
@@ -18,20 +18,8 @@
                     <h5>Open Tickets</h5>
                 </div>
                 <div class="card-body">
-                    <h2 class="display-4">0</h2>
-                    <a href="#" class="btn btn-primary">View Tickets</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Assigned to Me</h5>
-                </div>
-                <div class="card-body">
-                    <h2 class="display-4">0</h2>
-                    <a href="#" class="btn btn-primary">View Assigned</a>
+                    <h2 class="display-4">{{open_ticket_count}}</h2>
+                    <a href="{%url 'open_tickets'%}" class="btn btn-primary">View Tickets</a>
                 </div>
             </div>
         </div>
@@ -42,35 +30,14 @@
                     <h5>Closed Tickets</h5>
                 </div>
                 <div class="card-body">
-                    <h2 class="display-4">0</h2>
-                    <a href="#" class="btn btn-primary">View Closed</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Recent Tickets</h5>
-                </div>
-                <div class="card-body">
-                    <p>No recent tickets.</p>
+                    <h2 class="display-4">{{closed_ticket_count}}</h2>
+                    <a href="{%url 'closed_tickets'%}" class="btn btn-primary">View Closed</a>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Activity Log</h5>
-                </div>
-                <div class="card-body">
-                    <p>No recent activity.</p>
-                </div>
-            </div>
-        </div>
     </div>
+    
+    
 </div>
 {% endblock %}

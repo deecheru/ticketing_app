@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>user_tickets.migrations package &mdash; ticketing application 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ticketing application
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">user_tickets.migrations package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0001_initial">user_tickets.migrations.0001_initial module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0001_initial.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0001_initial.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0001_initial.Migration.initial"><code class="docutils literal notranslate"><span class="pre">Migration.initial</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0001_initial.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0002_servicetype">user_tickets.migrations.0002_servicetype module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0002_servicetype.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0002_servicetype.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0002_servicetype.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0003_servicecategory">user_tickets.migrations.0003_servicecategory module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0003_servicecategory.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0003_servicecategory.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0003_servicecategory.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0004_ticket">user_tickets.migrations.0004_ticket module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0004_ticket.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0004_ticket.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0004_ticket.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0005_ticket_assigned_to">user_tickets.migrations.0005_ticket_assigned_to module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0006_ticket_company">user_tickets.migrations.0006_ticket_company module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0006_ticket_company.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0006_ticket_company.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0006_ticket_company.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0007_remove_ticket_company">user_tickets.migrations.0007_remove_ticket_company module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0007_remove_ticket_company.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0007_remove_ticket_company.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0007_remove_ticket_company.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0008_ticket_company">user_tickets.migrations.0008_ticket_company module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0008_ticket_company.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0008_ticket_company.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0008_ticket_company.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0009_ticketattachment">user_tickets.migrations.0009_ticketattachment module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0009_ticketattachment.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0009_ticketattachment.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0009_ticketattachment.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0010_ticketcomment">user_tickets.migrations.0010_ticketcomment module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0010_ticketcomment.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0010_ticketcomment.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0010_ticketcomment.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts">user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0012_alter_ticket_contacts">user_tickets.migrations.0012_alter_ticket_contacts module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0013_alter_ticketcomment_text">user_tickets.migrations.0013_alter_ticketcomment_text module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0014_alter_ticket_status">user_tickets.migrations.0014_alter_ticket_status module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0014_alter_ticket_status.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0014_alter_ticket_status.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0014_alter_ticket_status.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at">user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations.0016_alter_ticket_description">user_tickets.migrations.0016_alter_ticket_description module</a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0016_alter_ticket_description.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li><a class="reference internal" href="#user_tickets.migrations.0016_alter_ticket_description.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li><a class="reference internal" href="#user_tickets.migrations.0016_alter_ticket_description.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-user_tickets.migrations">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ticketing application</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">user_tickets.migrations package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/user_tickets.migrations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-tickets-migrations-package">
+<h1>user_tickets.migrations package<a class="headerlink" href="#user-tickets-migrations-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-user_tickets.migrations.0001_initial">
+<span id="user-tickets-migrations-0001-initial-module"></span><h2>user_tickets.migrations.0001_initial module<a class="headerlink" href="#module-user_tickets.migrations.0001_initial" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0001_initial.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0001_initial.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0001_initial.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0001_initial.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0001_initial.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0005_alter_user_company')]</span></em><a class="headerlink" href="#user_tickets.migrations.0001_initial.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0001_initial.Migration.initial">
+<span class="sig-name descname"><span class="pre">initial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#user_tickets.migrations.0001_initial.Migration.initial" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0001_initial.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='ServiceFamily',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('description',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('updated_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('company',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'verbose_name_plural':</span> <span class="pre">'Service</span> <span class="pre">Families',</span> <span class="pre">'ordering':</span> <span class="pre">['name'],</span> <span class="pre">'unique_together':</span> <span class="pre">{('name',</span> <span class="pre">'company')}}&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0001_initial.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0002_servicetype">
+<span id="user-tickets-migrations-0002-servicetype-module"></span><h2>user_tickets.migrations.0002_servicetype module<a class="headerlink" href="#module-user_tickets.migrations.0002_servicetype" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0002_servicetype.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0002_servicetype.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0002_servicetype.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0002_servicetype.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0002_servicetype.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0001_initial')]</span></em><a class="headerlink" href="#user_tickets.migrations.0002_servicetype.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0002_servicetype.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='ServiceType',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('description',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('updated_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('family',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'ordering':</span> <span class="pre">['name'],</span> <span class="pre">'unique_together':</span> <span class="pre">{('name',</span> <span class="pre">'family')}}&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0002_servicetype.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0003_servicecategory">
+<span id="user-tickets-migrations-0003-servicecategory-module"></span><h2>user_tickets.migrations.0003_servicecategory module<a class="headerlink" href="#module-user_tickets.migrations.0003_servicecategory" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0003_servicecategory.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0003_servicecategory.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0003_servicecategory.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0003_servicecategory.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0003_servicecategory.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0002_servicetype')]</span></em><a class="headerlink" href="#user_tickets.migrations.0003_servicecategory.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0003_servicecategory.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='ServiceCategory',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('description',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('updated_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('service_type',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'verbose_name_plural':</span> <span class="pre">'Service</span> <span class="pre">Categories',</span> <span class="pre">'ordering':</span> <span class="pre">['name'],</span> <span class="pre">'unique_together':</span> <span class="pre">{('name',</span> <span class="pre">'service_type')}}&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0003_servicecategory.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0004_ticket">
+<span id="user-tickets-migrations-0004-ticket-module"></span><h2>user_tickets.migrations.0004_ticket module<a class="headerlink" href="#module-user_tickets.migrations.0004_ticket" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0004_ticket.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0004_ticket.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0004_ticket.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0004_ticket.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0004_ticket.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0003_servicecategory'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0004_ticket.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0004_ticket.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='Ticket',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('title',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('description',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('status',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('impact',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('priority',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('category',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('created_by',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0004_ticket.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0005_ticket_assigned_to">
+<span id="user-tickets-migrations-0005-ticket-assigned-to-module"></span><h2>user_tickets.migrations.0005_ticket_assigned_to module<a class="headerlink" href="#module-user_tickets.migrations.0005_ticket_assigned_to" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0005_ticket_assigned_to.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0005_ticket_assigned_to.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0005_ticket_assigned_to.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0005_ticket_assigned_to.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0004_ticket'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0005_ticket_assigned_to.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='assigned_to',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0005_ticket_assigned_to.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0006_ticket_company">
+<span id="user-tickets-migrations-0006-ticket-company-module"></span><h2>user_tickets.migrations.0006_ticket_company module<a class="headerlink" href="#module-user_tickets.migrations.0006_ticket_company" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0006_ticket_company.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0006_ticket_company.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0006_ticket_company.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0006_ticket_company.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0006_ticket_company.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0005_alter_user_company'),</span> <span class="pre">('user_tickets',</span> <span class="pre">'0005_ticket_assigned_to')]</span></em><a class="headerlink" href="#user_tickets.migrations.0006_ticket_company.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0006_ticket_company.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='company',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0006_ticket_company.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0007_remove_ticket_company">
+<span id="user-tickets-migrations-0007-remove-ticket-company-module"></span><h2>user_tickets.migrations.0007_remove_ticket_company module<a class="headerlink" href="#module-user_tickets.migrations.0007_remove_ticket_company" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0007_remove_ticket_company.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0007_remove_ticket_company.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0007_remove_ticket_company.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0007_remove_ticket_company.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0007_remove_ticket_company.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0006_ticket_company')]</span></em><a class="headerlink" href="#user_tickets.migrations.0007_remove_ticket_company.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0007_remove_ticket_company.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RemoveField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='company'&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0007_remove_ticket_company.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0008_ticket_company">
+<span id="user-tickets-migrations-0008-ticket-company-module"></span><h2>user_tickets.migrations.0008_ticket_company module<a class="headerlink" href="#module-user_tickets.migrations.0008_ticket_company" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0008_ticket_company.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0008_ticket_company.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0008_ticket_company.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0008_ticket_company.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0008_ticket_company.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('accounts',</span> <span class="pre">'0005_alter_user_company'),</span> <span class="pre">('user_tickets',</span> <span class="pre">'0007_remove_ticket_company')]</span></em><a class="headerlink" href="#user_tickets.migrations.0008_ticket_company.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0008_ticket_company.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='company',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0008_ticket_company.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0009_ticketattachment">
+<span id="user-tickets-migrations-0009-ticketattachment-module"></span><h2>user_tickets.migrations.0009_ticketattachment module<a class="headerlink" href="#module-user_tickets.migrations.0009_ticketattachment" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0009_ticketattachment.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0009_ticketattachment.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0009_ticketattachment.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0009_ticketattachment.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0009_ticketattachment.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0008_ticket_company'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0009_ticketattachment.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0009_ticketattachment.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='TicketAttachment',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('file',</span> <span class="pre">&lt;django.db.models.fields.files.FileField&gt;),</span> <span class="pre">('filename',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('file_type',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('size',</span> <span class="pre">&lt;django.db.models.fields.PositiveIntegerField&gt;),</span> <span class="pre">('uploaded_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('ticket',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('uploaded_by',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0009_ticketattachment.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0010_ticketcomment">
+<span id="user-tickets-migrations-0010-ticketcomment-module"></span><h2>user_tickets.migrations.0010_ticketcomment module<a class="headerlink" href="#module-user_tickets.migrations.0010_ticketcomment" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0010_ticketcomment.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0010_ticketcomment.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0010_ticketcomment.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0010_ticketcomment.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0010_ticketcomment.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0009_ticketattachment'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0010_ticketcomment.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0010_ticketcomment.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='TicketComment',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.BigAutoField&gt;),</span> <span class="pre">('text',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('created_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('updated_at',</span> <span class="pre">&lt;django.db.models.fields.DateTimeField&gt;),</span> <span class="pre">('is_internal',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('created_by',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('ticket',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'ordering':</span> <span class="pre">['created_at']}&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0010_ticketcomment.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts">
+<span id="user-tickets-migrations-0011-remove-ticketcomment-is-internal-ticket-contacts-module"></span><h2>user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts module<a class="headerlink" href="#module-user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0011_remove_ticketcomment_is_internal_ticket_contacts.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0010_ticketcomment'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RemoveField</span>&#160; <span class="pre">model_name='ticketcomment',</span> <span class="pre">name='is_internal'&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='contacts',</span> <span class="pre">field=&lt;django.db.models.fields.related.ManyToManyField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0011_remove_ticketcomment_is_internal_ticket_contacts.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0012_alter_ticket_contacts">
+<span id="user-tickets-migrations-0012-alter-ticket-contacts-module"></span><h2>user_tickets.migrations.0012_alter_ticket_contacts module<a class="headerlink" href="#module-user_tickets.migrations.0012_alter_ticket_contacts" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0012_alter_ticket_contacts.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0012_alter_ticket_contacts.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0012_alter_ticket_contacts.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0012_alter_ticket_contacts.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0011_remove_ticketcomment_is_internal_ticket_contacts'),</span> <span class="pre">('accounts',</span> <span class="pre">'__first__')]</span></em><a class="headerlink" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0012_alter_ticket_contacts.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='contacts',</span> <span class="pre">field=&lt;django.db.models.fields.related.ManyToManyField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0012_alter_ticket_contacts.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0013_alter_ticketcomment_text">
+<span id="user-tickets-migrations-0013-alter-ticketcomment-text-module"></span><h2>user_tickets.migrations.0013_alter_ticketcomment_text module<a class="headerlink" href="#module-user_tickets.migrations.0013_alter_ticketcomment_text" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0013_alter_ticketcomment_text.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0013_alter_ticketcomment_text.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0013_alter_ticketcomment_text.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0013_alter_ticketcomment_text.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0012_alter_ticket_contacts')]</span></em><a class="headerlink" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0013_alter_ticketcomment_text.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='ticketcomment',</span> <span class="pre">name='text',</span> <span class="pre">field=&lt;django.db.models.fields.TextField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0013_alter_ticketcomment_text.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0014_alter_ticket_status">
+<span id="user-tickets-migrations-0014-alter-ticket-status-module"></span><h2>user_tickets.migrations.0014_alter_ticket_status module<a class="headerlink" href="#module-user_tickets.migrations.0014_alter_ticket_status" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0014_alter_ticket_status.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0014_alter_ticket_status.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0014_alter_ticket_status.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0014_alter_ticket_status.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0014_alter_ticket_status.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0013_alter_ticketcomment_text')]</span></em><a class="headerlink" href="#user_tickets.migrations.0014_alter_ticket_status.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0014_alter_ticket_status.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='status',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0014_alter_ticket_status.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at">
+<span id="user-tickets-migrations-0015-ticket-resolved-at-ticket-updated-at-module"></span><h2>user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at module<a class="headerlink" href="#module-user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0015_ticket_resolved_at_ticket_updated_at.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0014_alter_ticket_status')]</span></em><a class="headerlink" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='resolved_at',</span> <span class="pre">field=&lt;django.db.models.fields.DateTimeField&gt;&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='updated_at',</span> <span class="pre">field=&lt;django.db.models.fields.DateTimeField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0015_ticket_resolved_at_ticket_updated_at.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations.0016_alter_ticket_description">
+<span id="user-tickets-migrations-0016-alter-ticket-description-module"></span><h2>user_tickets.migrations.0016_alter_ticket_description module<a class="headerlink" href="#module-user_tickets.migrations.0016_alter_ticket_description" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="user_tickets.migrations.0016_alter_ticket_description.Migration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">user_tickets.migrations.0016_alter_ticket_description.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/user_tickets/migrations/0016_alter_ticket_description.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#user_tickets.migrations.0016_alter_ticket_description.Migration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0016_alter_ticket_description.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('user_tickets',</span> <span class="pre">'0015_ticket_resolved_at_ticket_updated_at')]</span></em><a class="headerlink" href="#user_tickets.migrations.0016_alter_ticket_description.Migration.dependencies" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="user_tickets.migrations.0016_alter_ticket_description.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='ticket',</span> <span class="pre">name='description',</span> <span class="pre">field=&lt;django.db.models.fields.TextField&gt;&gt;]</span></em><a class="headerlink" href="#user_tickets.migrations.0016_alter_ticket_description.Migration.operations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-user_tickets.migrations">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-user_tickets.migrations" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, deepika.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

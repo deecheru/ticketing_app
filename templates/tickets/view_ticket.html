@@ -1,0 +1,180 @@
+<!-- tickets/templates/tickets/view_ticket.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0 font-weight-bold text-dark">Ticket #{{ ticket.id }}</h5>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url back_url %}" class="btn btn-outline-secondary btn-sm me-2">
+                        Back to Tickets
+                    </a>
+                    {% if ticket.created_by == request.user or request.user.is_staff %}
+                    <a href="{% url 'edit_ticket' ticket.id %}" class="btn btn-primary btn-sm">
+                        Edit Ticket
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Status Badges -->
+            <div class="mb-4">
+                {% if ticket.status == 'open' %}
+                    <span class="badge bg-success text-white">Open</span>
+                {% elif ticket.status == 'in_progress' %}
+                    <span class="badge bg-primary text-white">In Progress</span>
+                {% elif ticket.status == 'resolved' %}
+                    <span class="badge bg-secondary text-white">Resolved</span>
+                {% elif ticket.status == 'closed' %}
+                    <span class="badge bg-secondary text-white">Closed</span>
+                {% endif %}
+                
+                {% if ticket.priority == 'high' %}
+                    <span class="badge bg-danger ms-2">High Priority</span>
+                {% elif ticket.priority == 'urgent' %}
+                    <span class="badge bg-danger ms-2">Urgent</span>
+                {% endif %}
+            </div>
+
+            <!-- Ticket Details -->
+            <div class="mb-4">
+                <h4 class="mb-1">{{ ticket.title }}</h4>
+                <p class="text-muted small">Submitted by {{ ticket.created_by.username }} on {{ ticket.created_at|date:"F j, Y, g:i a" }}</p>
+                
+                <div class="bg-light p-3 rounded mt-3 mb-3">
+                    <p class="mb-0" style="white-space: pre-wrap;">{{ ticket.description }}</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Category:</strong> {{ ticket.category }}</p>
+                        <p class="mb-1"><strong>Impact:</strong> {{ ticket.get_impact_display }}</p>
+                        <p class="mb-1"><strong>Priority:</strong> {{ ticket.get_priority_display }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ ticket.status }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Assigned to:</strong> {{ ticket.assigned_to|default:"Not assigned" }}</p>
+                        <p class="mb-1"><strong>Last updated:</strong> {{ ticket.updated_at|date:"F j, Y, g:i a"|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attachments Section -->
+            {% if ticket.attachments.exists %}
+            <div class="border-top pt-3 mb-4">
+                <h5 class="mb-3">Attachments</h5>
+                <div class="row g-2">
+                    {% for attachment in ticket.attachments.all %}
+                    <div class="col-sm-6">
+                        <div class="border p-2 rounded d-flex align-items-center hover-bg-light">
+                            <div class="me-2">
+                                {% if attachment.get_extension == '.jpg' or attachment.get_extension == '.jpeg' or attachment.get_extension == '.png' or attachment.get_extension == '.gif' %}
+                                    <i class="bi bi-file-image fs-4"></i>
+                                {% elif attachment.get_extension == '.pdf' %}
+                                    <i class="bi bi-file-pdf fs-4"></i>
+                                {% elif attachment.get_extension == '.doc' or attachment.get_extension == '.docx' %}
+                                    <i class="bi bi-file-word fs-4"></i>
+                                {% elif attachment.get_extension == '.xls' or attachment.get_extension == '.xlsx' %}
+                                    <i class="bi bi-file-excel fs-4"></i>
+                                {% else %}
+                                    <i class="bi bi-paperclip fs-4"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1 text-truncate">
+                                <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none">
+                                    {{ attachment.filename }}
+                                </a>
+                                <div class="small text-muted">Uploaded {{ attachment.uploaded_at|date:"F j, Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mb-4 border-top pt-3">
+              <h6 class="mb-3 text-muted">Tagged Contacts</h6>
+              {% if ticket.contacts.exists %}
+                  <ul class="list-unstyled">
+                      {% for contact in ticket.contacts.all %}
+                          <li class="mb-1">
+                              <i class="bi bi-person-fill text-info me-1"></i> {{ contact.username }}
+                          </li>
+                      {% endfor %}
+                  </ul>
+              {% else %}
+                  <p class="text-muted small">No contacts are tagged in this ticket.</p>
+              {% endif %}
+          </div>
+            
+            <!-- Comments Section -->
+            <div class="border-top pt-4 mt-4">
+            <h5 class="mb-3 font-weight-bold">Updates</h5>
+            {% if ticket.comments.exists %}
+                <div class="d-flex flex-column gap-3">
+                    {% for comment in ticket.comments.all %}
+                        <div class="card shadow-sm mb-3">
+                            <div class="card-header bg-light py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">{{ comment.created_by.username }}</span>
+                                        {% if comment.is_internal %}
+                                            <span class="badge bg-secondary ms-2">Internal</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">{{ comment.created_at|date:"F j, Y, g:i a" }}</small>
+                                </div>
+                            </div>
+                            <div class="card-body py-3">
+                                <p class="mb-0">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No updates yet</p>
+            {% endif %}
+            
+            <!-- Add Comment Form -->
+            {% if ticket.status != 'closed' %}
+                <div class="mt-4 border-top pt-4">
+                    <h5 class="mb-3 font-weight-bold">Comment</h5>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            
+                            {{ comment_form.text }}
+                            {% if comment_form.text.errors %}
+                                <div class="text-danger">{{ comment_form.text.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Comment</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+      </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+A new comment has been added to Ticket [{{ company.name }}] #{{ ticket.id }} - {{ ticket.title }} by {{ comment.created_by.username }}:
+
+{{ comment.text }}
+
+View the full ticket and comment here: {{ ticket_url }}
+
+Thank you,
+Your Support Team

@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Tickets{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Manage Tickets</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Statuses</option>
+                        {% for status in status_choices %}
+                        <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="priority" class="form-label">Priority</label>
+                    <select class="form-select" id="priority" name="priority">
+                        <option value="">All Priorities</option>
+                        {% for priority in priority_choices %}
+                        <option value="{{ priority.0 }}" {% if request.GET.priority == priority.0 %}selected{% endif %}>{{ priority.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="company" class="form-label">Company</label>
+                    <select class="form-select" id="company" name="company">
+                        <option value="">All Companies</option>
+                        {% for company in companies %}
+                        <option value="{{ company.id }}" {% if request.GET.company == company.id|stringformat:"i" %}selected{% endif %}>{{ company.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Search tickets..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'admin_manage_tickets' %}" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tickets Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Ticket List</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="ticketsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Company</th>
+                            <th>Created By</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>{{ ticket.company.name }}</td>
+                            <td>{{ ticket.created_by.username }}</td>
+                            <td>
+                                <span class="badge {% if ticket.status == 'open' %}bg-success{% elif ticket.status == 'in_progress' %}bg-warning{% elif ticket.status == 'resolved' %}bg-info{% else %}bg-secondary{% endif %}">
+                                    {{ ticket.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if ticket.priority == 'low' %}bg-info{% elif ticket.priority == 'medium' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ ticket.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'view_ticket' ticket.id %}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#editTicketModal{{ ticket.id }}">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTicketModal{{ ticket.id }}">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Ticket Modals -->
+{% for ticket in tickets %}
+<div class="modal fade" id="editTicketModal{{ ticket.id }}" tabindex="-1" aria-labelledby="editTicketModalLabel{{ ticket.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTicketModalLabel{{ ticket.id }}">Edit Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'admin_manage_tickets' %}">
+                {% csrf_token %}
+                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editTitle{{ ticket.id }}" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="editTitle{{ ticket.id }}" name="title" value="{{ ticket.title }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStatus{{ ticket.id }}" class="form-label">Status</label>
+                        <select class="form-select" id="editStatus{{ ticket.id }}" name="status" required>
+                            {% for status in status_choices %}
+                            <option value="{{ status.0 }}" {% if status.0 == ticket.status %}selected{% endif %}>{{ status.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPriority{{ ticket.id }}" class="form-label">Priority</label>
+                        <select class="form-select" id="editPriority{{ ticket.id }}" name="priority" required>
+                            {% for priority in priority_choices %}
+                            <option value="{{ priority.0 }}" {% if priority.0 == ticket.priority %}selected{% endif %}>{{ priority.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCompany{{ ticket.id }}" class="form-label">Company</label>
+                        <select class="form-select" id="editCompany{{ ticket.id }}" name="company" required>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}" {% if company.id == ticket.company.id %}selected{% endif %}>{{ company.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Ticket Modal -->
+<div class="modal fade" id="deleteTicketModal{{ ticket.id }}" tabindex="-1" aria-labelledby="deleteTicketModalLabel{{ ticket.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTicketModalLabel{{ ticket.id }}">Delete Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete ticket #{{ ticket.id }} - {{ ticket.title }}? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'admin_manage_tickets' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#ticketsTable').DataTable({
+            "order": [[0, "desc"]],
+            "pageLength": 25
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

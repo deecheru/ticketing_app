@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,36 +15,63 @@
     <!-- Page specific CSS -->
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="d-flex flex-column h-100">
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #314457 !important;">
             <div class="container">
-                <a class="navbar-brand" href="#">Ticketing System</a>
+                <a class="navbar-brand" href="{% url 'dashboard' %}">Ticketing System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Tickets</a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                            </li>
+                            {%if not user.is_company_agent and not user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'select_service' %}">Create Ticket</a>
+                            </li>
+                            {%endif%}                            
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'open_tickets' %}">Open Tickets</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'closed_tickets' %}">Closed Tickets</a>
+                            </li>
+                            {% if user.is_staff %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_companies' %}">Manage Companies</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_users' %}">Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_manage_tickets' %}">Manage Tickets</a></li>
+                                </ul>
+                            </li>
+                            {% endif %}
                         {% endif %}
                     </ul>
                     <ul class="navbar-nav">
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ user.username }}
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>{{ user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' %}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'change_password' %}">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
                             </ul>
                         </li>
                         {% else %}
@@ -58,26 +85,16 @@
         </nav>
     </header>
 
-    <main class="container py-4">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+    <main class="container py-4 flex-grow-1">
+        
 
         {% block content %}{% endblock %}
-    </main>
-
+    </main>  
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
             <span class="text-muted">© {% now "Y" %} Multi-Tenant Ticketing System</span>
         </div>
-    </footer>
+    </footer> 
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

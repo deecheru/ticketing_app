@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Ticket{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="h3 mb-0">Create New Support Ticket</h1>
+    </div>
+    
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" id="ticketForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+        
+        <!-- Title Field -->
+        <div class="mb-4">
+          <label for="{{ form.title.id_for_label }}" class="form-label">
+            Title <span class="text-danger">*</span>
+          </label>
+          {{ form.title }}
+          {% if form.title.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.title.errors }}
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Description Field -->
+        <div class="mb-4">
+          <label for="{{ form.description.id_for_label }}" class="form-label">
+            Description <span class="text-danger">*</span>
+          </label>
+          {{ form.description }}
+          {% if form.description.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.description.errors }}
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Service Hierarchy Fields -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label for="{{ form.service_family.id_for_label }}" class="form-label">
+              Service Family <span class="text-danger">*</span>
+            </label>
+            {{ form.service_family }}
+            {% if form.service_family.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.service_family.errors }}
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-4">
+            <label for="{{ form.service_type.id_for_label }}" class="form-label">
+              Service Type <span class="text-danger">*</span>
+            </label>
+            {{ form.service_type }}
+            {% if form.service_type.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.service_type.errors }}
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-4">
+            <label for="{{ form.category.id_for_label }}" class="form-label">
+              Category <span class="text-danger">*</span>
+            </label>
+            {{ form.category }}
+            {% if form.category.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.category.errors }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Impact and Priority Fields in a row -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="{{ form.impact.id_for_label }}" class="form-label">
+              Impact <span class="text-danger">*</span>
+            </label>
+            {{ form.impact }}
+            {% if form.impact.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.impact.errors }}
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="{{ form.priority.id_for_label }}" class="form-label">
+              Priority <span class="text-danger">*</span>
+            </label>
+            {{ form.priority }}
+            {% if form.priority.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.priority.errors }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="mb-3">
+    <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+    {{ form.status }}
+    {% for error in form.status.errors %}
+        <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+</div>
+        <!-- File Attachments -->
+        <div class="mb-4">
+          <label for="attachments" class="form-label">
+            Attachments
+          </label>
+          <div class="input-group">
+            <input type="file" name="attachments" id="attachments" multiple 
+                   class="form-control" onchange="updateFileList(this)">
+          </div>
+          <div id="file-list" class="mt-2"></div>
+          <div class="form-text">Upload any relevant files or screenshots (optional)</div>
+        </div>
+
+        <!-- Comments -->
+        <div class="mb-4">
+          <label for="{{ comment_form.text.id_for_label }}" class="form-label">
+            Initial Comment (Optional)
+          </label>
+          {{ comment_form.text }}
+          {% if comment_form.text.errors %}
+          <div class="invalid-feedback d-block">
+            {{ comment_form.text.errors }}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-4">
+          <label for="{{ form.contacts.id_for_label }}" class="form-label">
+            Contacts (Tag people from your company)
+          </label>
+          {{ form.contacts }}
+          {% if form.contacts.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.contacts.errors }}
+          </div>
+          {% endif %}
+          <div class="form-text">{{ form.contacts.help_text }}</div>
+        </div>
+      
+        <div class="d-flex justify-content-between pt-3 border-top">
+          <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Create Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .select-wrapper {
+    position: relative;
+  }
+  
+  .select-wrapper::after {
+    content: '▼';
+    font-size: 12px;
+    color: #6c757d;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  
+  .select-wrapper select {
+    appearance: none;
+    padding-right: 30px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wrap select elements in a div with select-wrapper class, excluding contacts field
+    const selectFields = document.querySelectorAll('select:not([name="contacts"])');
+    selectFields.forEach(select => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'select-wrapper';
+      select.parentNode.insertBefore(wrapper, select);
+      wrapper.appendChild(select);
+    });
+
+    // Add form-control class to all form inputs
+    const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea, select');
+    formInputs.forEach(input => {
+      input.classList.add('form-control');
+
+      if (input.tagName === 'TEXTAREA') {
+        input.rows = 5;
+      }
+    });
+
+    const serviceFamilySelect = document.getElementById('id_service_family');
+    const serviceTypeSelect = document.getElementById('id_service_type');
+    const categorySelect = document.getElementById('id_category');
+
+    // Function to update service types based on selected family
+    function updateServiceTypes(selectedTypeId) {
+      const familyId = serviceFamilySelect.value;
+      if (familyId) {
+        fetch(`/api/service-types/?family_id=${familyId}`)
+          .then(response => response.json())
+          .then(data => {
+            serviceTypeSelect.innerHTML = '<option value="">---------</option>';
+            data.forEach(type => {
+              const option = new Option(type.name, type.id);
+              serviceTypeSelect.add(option);
+            });
+            serviceTypeSelect.disabled = false;
+
+            // If a service type was pre-selected, set it here and then update categories
+            if (selectedTypeId) {
+              serviceTypeSelect.value = selectedTypeId;
+              updateCategories('{{ initial_category.id|default:"" }}'); 
+            } else {
+              updateCategories(''); // No initial category, reset categories
+            }
+          });
+      } else {
+        serviceTypeSelect.innerHTML = '<option value="">---------</option>';
+        serviceTypeSelect.disabled = true;
+        categorySelect.innerHTML = '<option value="">---------</option>';
+        categorySelect.disabled = true;
+      }
+    }
+
+    // Function to update categories based on selected service type
+    function updateCategories(selectedCategoryId) {
+      const typeId = serviceTypeSelect.value;
+      if (typeId) {
+        fetch(`/api/service-categories/?type_id=${typeId}`)
+          .then(response => response.json())
+          .then(data => {
+            categorySelect.innerHTML = '<option value="">---------</option>';
+            data.forEach(category => {
+              const option = new Option(category.name, category.id);
+              categorySelect.add(option);
+            });
+            categorySelect.disabled = false;
+
+            // If a category was pre-selected, set it here
+            if (selectedCategoryId) {
+              categorySelect.value = selectedCategoryId;
+            }
+          });
+      } else {
+        categorySelect.innerHTML = '<option value="">---------</option>';
+        categorySelect.disabled = true;
+      }
+    }
+
+    // Add event listeners
+    serviceFamilySelect.addEventListener('change', () => updateServiceTypes(null)); // Reset type and category on family change
+    serviceTypeSelect.addEventListener('change', () => updateCategories(null));   // Reset category on type change
+
+    // Initialize the form with preselected values if provided
+    const initialFamilyId = '{{ initial_service_family.id|default:"" }}';
+    const initialTypeId = '{{ initial_service_type.id|default:"" }}';
+    const initialCategoryId = '{{ initial_category.id|default:"" }}';
+
+    if (initialFamilyId) {
+      serviceFamilySelect.value = initialFamilyId;
+      
+      // Fetch and populate service types
+      fetch(`/api/service-types/?family_id=${initialFamilyId}`)
+        .then(response => response.json())
+        .then(data => {
+          serviceTypeSelect.innerHTML = '<option value="">---------</option>';
+          data.forEach(type => {
+            const option = new Option(type.name, type.id);
+            serviceTypeSelect.add(option);
+          });
+          serviceTypeSelect.disabled = false;
+          
+          // Set selected type if provided
+          if (initialTypeId) {
+            serviceTypeSelect.value = initialTypeId;
+            
+            // Fetch and populate categories
+            fetch(`/api/service-categories/?type_id=${initialTypeId}`)
+              .then(response => response.json())
+              .then(data => {
+                categorySelect.innerHTML = '<option value="">---------</option>';
+                data.forEach(cat => {
+                  const option = new Option(cat.name, cat.id);
+                  categorySelect.add(option);
+                });
+                categorySelect.disabled = false;
+                
+                // Set selected category if provided
+                if (initialCategoryId) {
+                  categorySelect.value = initialCategoryId;
+                }
+              });
+          }
+        });
+    } else {
+      // If no initial values, start with empty service types and categories
+      serviceTypeSelect.disabled = true;
+      categorySelect.disabled = true;
+    }
+});
+</script>
+{% endblock %}

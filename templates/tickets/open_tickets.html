@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Open Tickets{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0 font-weight-bold text-dark">Open Tickets</h5>
+                </div>
+                <div class="col-auto">
+                    {%if not user.is_company_agent%}
+                    <a href="{% url 'select_service' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Create New Ticket
+                    </a>
+                    {%endif%}
+                    <a href="?download=csv{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-success btn-sm">
+                        <i class="bi bi-download me-1"></i> Download CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search box -->
+        <div class="card-body bg-light">
+            <form method="get" action="" class="mb-0">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search tickets..." value="{{ search_query }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    {% if search_query %}
+                    <a href="{% url 'open_tickets' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        
+        <div class="card-body">
+            {% if search_query %}
+            <div class="alert alert-info d-flex align-items-center mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>
+                    Showing results for: <strong>"{{ search_query }}"</strong>
+                    {% with count=open_tickets.count %}
+                        ({{ count }} ticket{{ count|pluralize }} found)
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if open_tickets %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                {% if is_admin %}
+                                <th>Company</th>
+                                {% endif %}
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created</th>
+                                <th>Raised By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in open_tickets %}
+                                <tr>
+                                    <td>{{ ticket.id }}</td>
+                                    <td>{{ ticket.title }}</td>
+                                    {% if is_admin %}
+                                    <td>{{ ticket.company.name }}</td>
+                                    {% endif %}
+                                    <td>
+                                        {% if ticket.status == 'OPEN' %}
+                                            <span class="badge bg-success">Open</span>
+                                        {% elif ticket.status == 'IN_PROGRESS' %}
+                                            <span class="badge bg-primary">In Progress</span>
+                                        {% elif ticket.status == 'RESOLVED' %}
+                                            <span class="badge bg-warning text-dark">Resolved</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if ticket.priority == 'HIGH' %}
+                                            <span class="badge bg-danger">High</span>
+                                        {% elif ticket.priority == 'CRITICAL' %}
+                                            <span class="badge bg-danger">Critical</span>
+                                        {% elif ticket.priority == 'MEDIUM' %}
+                                            <span class="badge bg-warning text-dark">Medium</span>
+                                        {% else %}
+                                            <span class="badge bg-info text-dark">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ticket.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ ticket.created_by.get_full_name|default:ticket.created_by.username|default:"Unknown" }}</td>
+                                    <td>
+                                        <a href="{% url 'view_ticket' ticket.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        {% if ticket.created_by == request.user or request.user.is_company_agent or request.user.is_superuser %}
+                                        <a href="{% url 'edit_ticket' ticket.id %}" class="btn btn-sm btn-outline-secondary ms-1">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for i in paginator.page_range %}
+                            {% if page_obj.number == i %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                            {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-ticket-perforated" style="font-size: 3rem; color: #6c757d;"></i>
+                    {% if search_query %}
+                        <p class="mt-3 text-muted">No tickets found matching "{{ search_query }}".</p>
+                        <a href="{% url 'open_tickets' %}" class="btn btn-outline-secondary mt-2">
+                            Clear Search
+                        </a>
+                    {% else %}
+                        <p class="mt-3 text-muted">
+                            {% if is_admin %}
+                                No open tickets found in the system.
+                            {% else %}
+                                No open tickets found for your company.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'select_service' %}" class="btn btn-primary mt-2">
+                            Create New Ticket
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
